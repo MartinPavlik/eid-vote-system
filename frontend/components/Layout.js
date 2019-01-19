@@ -85,7 +85,7 @@ const Layout = ({
     <div className="container">
       <div className="sidebar">
         <div className="logo">
-          <img src="/static/logo.png" className="logo-image" alt="Screen Manager" />
+          <img src="/static/logo.png" className="logo-image" alt="Petitions" />
         </div>
 
         <div className="menu">

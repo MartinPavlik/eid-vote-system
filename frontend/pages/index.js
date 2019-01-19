@@ -6,7 +6,7 @@ import withData from 'lib/withData';
 import Home from 'Home/HomePage';
 
 
-const PlaylistsPage = () => (
+const HomePage = () => (
   <BaseLayout title="Petitions">
     <Layout>
       <Home />
@@ -16,4 +16,4 @@ const PlaylistsPage = () => (
 
 export default pipe(
   withData,
-)(PlaylistsPage);
+)(HomePage);
