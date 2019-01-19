@@ -17,6 +17,8 @@ const typeDefs = `
     _id: ID!
     title: String!
     description: String!
+    to: String!
+    from: String!
     owner: User!
     ownerId: ID!
   }
@@ -24,6 +26,8 @@ const typeDefs = `
   input PetitionInput {
     title: String!
     description: String
+    from: String!
+    to: String!
   }
 
   input LoginMessageInput {
@@ -58,8 +62,12 @@ const resolvers = {
   Mutation: {
     createPetition: async (_, { input }) => {
       // TODO - inject owner id
+      console.log('input: ', input); // eslint-disable-line
       const petition = new PetitionModel(input);
+
+      console.log('petition: ', petition); // eslint-disable-line
       const newPetition = await petition.save();
+      console.log('newPetition: ', newPetition); // eslint-disable-line
 
       return PetitionModel.findById(newPetition._id);
     },

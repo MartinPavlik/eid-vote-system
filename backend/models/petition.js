@@ -16,11 +16,11 @@ const petitionSchema = new Schema({
     default: '',
   },
   from: {
-    type: Date,
+    type: String,
     required: true,
   },
   to: {
-    type: Date,
+    type: String,
     required: true,
   },
   ownerId: {
