@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { ApolloProvider, getDataFromTree } from 'react-apollo';
-import { Provider } from 'react-redux';
 import Head from 'next/head';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import initApollo from './initApollo';
-import initRedux from './initRedux';
 
 // Gets the display name of a JSX component for dev tools
 function getComponentDisplayName(Component) {
@@ -13,12 +11,6 @@ function getComponentDisplayName(Component) {
 
 export default ComposedComponent => class WithData extends React.Component {
   static displayName = `WithData(${getComponentDisplayName(ComposedComponent)})`
-
-  /*
-  static propTypes = {
-    serverState: PropTypes.object.isRequired,
-  }
-  */
 
   static async getInitialProps(ctx) {
     let serverState = {};
@@ -32,7 +24,6 @@ export default ComposedComponent => class WithData extends React.Component {
     // Run all GraphQL queries in the component tree
     // and extract the resulting data
     if (!process.browser) {
-      const store = initRedux();
       const cache = new InMemoryCache();
 
       const apollo = initApollo(cache, ctx);
@@ -42,11 +33,9 @@ export default ComposedComponent => class WithData extends React.Component {
       try {
         // Run all GraphQL queries
         await getDataFromTree(
-          <Provider store={store}>
-            <ApolloProvider client={apollo}>
-              <ComposedComponent url={url} {...composedInitialProps} />
-            </ApolloProvider>
-          </Provider>);
+          <ApolloProvider client={apollo}>
+            <ComposedComponent url={url} {...composedInitialProps} />
+          </ApolloProvider>);
       } catch (error) {
         // Prevent Apollo Client GraphQL errors from crashing SSR.
         // Handle them in components via the data.error prop:
@@ -71,18 +60,15 @@ export default ComposedComponent => class WithData extends React.Component {
 
   constructor(props) {
     super(props);
-    this.store = initRedux();
     const cache = new InMemoryCache().restore(this.props.serverState);
     this.apollo = initApollo(cache);
   }
 
   render() {
     return (
-      <Provider store={this.store}>
-        <ApolloProvider client={this.apollo}>
-          <ComposedComponent {...this.props} />
-        </ApolloProvider>
-      </Provider>
+      <ApolloProvider client={this.apollo}>
+        <ComposedComponent {...this.props} />
+      </ApolloProvider>
     );
   }
 };
