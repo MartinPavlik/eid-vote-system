@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import WebID from './';
 
-class App extends Component {
+class Login extends Component {
+  state = {
+    isLoading: false,
+    error: null,
+  }
 
   componentDidMount() {
     if (process.browser) {
@@ -11,10 +17,19 @@ class App extends Component {
   }
 
   handleLogin = () => {
-    this.WebID.login((err, message, signature) => {
-      console.log('login: error', err);
+    this.setState({ error: null, isLoading: true });
+    this.WebID.login((error, message, signature) => {
+      console.log('login: error', error);
       console.log('login: message', message);
       console.log('login: signature', signature);
+      if (error) {
+        this.setState({
+          error: error.message,
+          isLoading: false,
+        });
+      } else {
+        // TODO
+      }
     });
   }
 
@@ -34,13 +49,26 @@ class App extends Component {
   }
 
   render() {
+    const { isLoading, error } = this.state;
+    if (error) {
+      return (
+        <Typography component="p">
+          Can not login because: {error}
+        </Typography>
+      );
+    }
     return (
-      <div className="App">
-        <button onClick={this.handleLogin}> LOGIN </button>
-        <button onClick={this.handleGetData}> GET DATA </button>
+      <div>
+        {isLoading ?
+          <Typography component="p">
+            Loading...
+          </Typography>
+          :
+          <Button onClick={this.handleLogin}>Login</Button>
+        }
       </div>
     );
   }
 }
 
-export default App;
+export default Login;
