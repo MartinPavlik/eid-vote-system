@@ -18,7 +18,7 @@ const styles = theme => {
 
 const AppBar = ({ classes }): React.Node => (
   <div className={classes.base}>
-    User Icon
+    TODO
   </div>
 );
 
