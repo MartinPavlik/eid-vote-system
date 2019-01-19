@@ -27,11 +27,11 @@ class WebID {
     }
   }
 
-  getData(data = ['cardID', 'dokState', 'DokTryLimit', 'DokMaxTryLimit', 'iokState', 'IokMaxTryLimit', 'IokTryLimit', 'serialNumber', 'documentNumber', 'CN', 'surName', 'givenName', 'street', 'locality', 'state', 'country'], cb) {
+  getData(cb, data = ['cardID', 'dokState', 'DokTryLimit', 'DokMaxTryLimit', 'iokState', 'IokMaxTryLimit', 'IokTryLimit', 'serialNumber', 'documentNumber', 'CN', 'surName', 'givenName', 'street', 'locality', 'state', 'country']) {
     // testWhichIsNotImplemented
     if (this.webSocket.readyState === 1) {
       console.log('try to get data');
-      const wsMessage = { cmd: 'get-date', msg: data };
+      const wsMessage = { cmd: 'get-data', msg: data };
       this.webSocket.send(JSON.stringify({ ...wsMessage }));
       this.getDataCallback = cb;
     } else {
@@ -57,7 +57,7 @@ class WebID {
   }
 
   parseEventData(event) {
-    console.log(event);
+    console.log('event', event);
     const data = JSON.parse(event.data);
     return data;
   }
@@ -97,7 +97,7 @@ class WebID {
       const bufferedMessage = Buffer.from(signedMessage, 'utf8');
       ecCrypto.verify(publicKey, bufferedMessage, signature)
         .then(() => resolve(true))
-        .catch(() => reject(false));// eslint-disable-line
+        .catch(() => reject(new Error('Can not verify message')));// eslint-disable-line
     });
   }
 

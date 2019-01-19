@@ -1,10 +1,9 @@
 import { makeExecutableSchema } from 'graphql-tools';
+import * as jwt from '../components/jwt';
 import UserModel from '../models/user';
 import PetitionModel from '../models/petition';
 
 const secp256k1 = require('secp256k1');
-
-// const eccrypto = require('eccrypto');
 
 const typeDefs = `
   type User {
@@ -88,11 +87,32 @@ const resolvers = {
       console.log('documentNumber', documentNumber);
       console.log('signature', signature);
 
-      console.log(secp256k1.verify(message, signature, publicKey));
 
-      // console.log('verified: ', verified);
-      // TOOD - generate JWT token here and return it
-      return '';
+      const messageAsString = JSON.stringify(message);
+
+      console.log('message as string', messageAsString);
+
+      const messageAsBuffer = Buffer.from(messageAsString);
+
+      console.log('message as buffer', messageAsBuffer);
+
+
+      // TODO - verify
+      console.log(secp256k1.verify(messageAsBuffer, signature, publicKey));
+
+
+      console.log('DONE');
+
+      let user = await UserModel.findOne({ documentNumber }).exec();
+
+      if (!user) {
+        const newUser = new UserModel({ documentNumber });
+        const newUserDoc = await newUser.save();
+        user = await UserModel.findById(newUserDoc._id).exec();
+      }
+
+      const payload = { _id: user._id };
+      return jwt.issue(payload);
     },
   },
 

@@ -1,4 +1,5 @@
 import * as ecCrypto from 'eccrypto';
+
 const webSocketUrl = 'ws://192.168.51.154:8080/websocket/msg';
 
 class WebID {
@@ -26,11 +27,11 @@ class WebID {
     }
   }
 
-  getData(data = ["cardID", "dokState", "DokTryLimit", "DokMaxTryLimit", "iokState", "IokMaxTryLimit", "IokTryLimit", "serialNumber", "documentNumber", "CN", "surName", "givenName", "street", "locality", "state", "country"], cb) {
+  getData(cb, data = ['cardID', 'dokState', 'DokTryLimit', 'DokMaxTryLimit', 'iokState', 'IokMaxTryLimit', 'IokTryLimit', 'serialNumber', 'documentNumber', 'CN', 'surName', 'givenName', 'street', 'locality', 'state', 'country']) {
     // testWhichIsNotImplemented
     if (this.webSocket.readyState === 1) {
       console.log('try to get data');
-      const wsMessage = { cmd: 'get-date', msg: data };
+      const wsMessage = { cmd: 'get-data', msg: data };
       this.webSocket.send(JSON.stringify({ ...wsMessage }));
       this.getDataCallback = cb;
     } else {
@@ -56,7 +57,7 @@ class WebID {
   }
 
   parseEventData(event) {
-    console.log(event);
+    console.log('event', event);
     const data = JSON.parse(event.data);
     return data;
   }
@@ -74,12 +75,12 @@ class WebID {
           this.data(data.msg, data.signature);
           break;
         case 'card-present-status':
-          this.statusChangeCallback && this.statusChangeCallback(data.msg);
+          this.statusChangeCallback && this.statusChangeCallback(data.msg); // eslint-disable-line
           break;
         default:
           console.log('unknown cmd');
       }
-    }
+    };
     this.webSocket.onclose = (event) => {
       console.log(event);
       setTimeout(() => {
@@ -90,13 +91,13 @@ class WebID {
 
   validateMessage(message, signature) {
     return new Promise((resolve, reject) => {
-      console.log('validation')
-      const publicKey = message.publicKey;
+      console.log('validation');
+      const publicKey = message.publicKey;// eslint-disable-line
       const signedMessage = JSON.stringify(message);
       const bufferedMessage = Buffer.from(signedMessage, 'utf8');
       ecCrypto.verify(publicKey, bufferedMessage, signature)
         .then(() => resolve(true))
-        .catch(() => reject(false));
+        .catch(() => reject(new Error('Can not verify message')));// eslint-disable-line
     });
   }
 
