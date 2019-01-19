@@ -8,6 +8,8 @@ import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import withTransformProps from 'lib/withTransformProps';
 import { parseIsoDateToString } from './utils';
+import SexChart from './components/SexChart';
+import AgeChart from './components/AgeChart';
 
 
 const styles = () => ({
@@ -17,9 +19,49 @@ const styles = () => ({
   signed: {
     background: 'red',
   },
+  voteHeader: {
+    fontWeight: 'bold',
+    marginBottom: 10,
+    fontSize: '1.25em',
+  },
+  info: {
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
 });
 
 class DetailPage extends Component {
+  parseVotes = (users) => {
+    const ret = {
+      sex: [0, 0],
+      count: 0,
+      ages: [0, 0, 0, 0, 0],
+    };
+
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
+      if (user.sex === 'M') {
+        ret.sex[1]++;
+      } else {
+        ret.sex[0]++;
+      }
+
+      if (user.age < 25) {
+        ret.age[0]++;
+      } else if (user.age < 35) {
+        ret.age[1]++;
+      } else if (user.age < 50) {
+        ret.age[2]++;
+      } else if (user.age < 65) {
+        ret.age[3]++;
+      } else {
+        ret.age[4]++;
+      }
+    }
+
+    return ret;
+  }
+
   handleSign = () => {
   }
 
@@ -33,6 +75,7 @@ class DetailPage extends Component {
     const now = new Date();
 
     const canCongirm = now < dateTo;
+    const chartData = this.parseVotes([]);
 
     console.log(this.props);
     return (
@@ -43,17 +86,17 @@ class DetailPage extends Component {
         </Typography>
 
         <div className={classes.row}>
-          <div>Popis</div>
+          <div className={classes.info}>Popis</div>
           <div>{petition.description}</div>
         </div>
 
         <div className={classes.row}>
-          <div>Hlasování od</div>
+          <div className={classes.info}>Hlasování od</div>
           <div>{from}</div>
         </div>
 
         <div className={classes.row}>
-          <div>Hlasování do</div>
+          <div className={classes.info}>Hlasování do</div>
           <div>{to}</div>
         </div>
 
@@ -72,6 +115,37 @@ class DetailPage extends Component {
           </div>
 
         )}
+
+        <Typography component="h2" variant="display1" gutterBottom>
+          Průběžné výsledky
+        </Typography>
+
+        <div className={classes.row}>
+          <div className={classes.voteHeader}>
+            Hlasovalo celkem
+          </div>
+          <div>
+            55
+          </div>
+        </div>
+
+        <div className={classes.row}>
+          <div className={classes.voteHeader}>
+            Věk hlasujících
+          </div>
+          <AgeChart
+            data={chartData.ages}
+          />
+        </div>
+
+        <div className={classes.row}>
+          <div className={classes.voteHeader}>
+            Pohlaví hlasujících
+          </div>
+          <SexChart
+            data={chartData.sex}
+          />
+        </div>
 
       </Fragment>
     );
