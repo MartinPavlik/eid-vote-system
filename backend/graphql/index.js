@@ -9,7 +9,7 @@ const secp256k1 = require('secp256k1');
 const typeDefs = `
   type User {
     _id: ID!
-    cardId: String!
+    documentNumber: String!
     name: String
   }
 
@@ -53,10 +53,10 @@ const typeDefs = `
 
 const resolvers = {
   Query: {
-    petitions: (_, { _id }) => (_id ?
-      PetitionModel.findById(_id) :
-      PetitionModel.find({}).exec()
-    ),
+    petitions: (_, { _id }) => {
+      const filter = _id ? { _id } : {};
+      return PetitionModel.find(filter).exec();
+    },
   },
 
   Mutation: {

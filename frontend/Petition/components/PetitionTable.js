@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Link from 'components/Link';
 
 
 const CustomTableCell = withStyles(theme => ({
@@ -32,7 +33,7 @@ const styles = theme => ({
 
 class PetitionTable extends Component {
   render() {
-    const { classes, rows, handleClickRow } = this.props;
+    const { classes, rows, onRowClick } = this.props;
 
     return (
       <Fragment>
@@ -49,9 +50,13 @@ class PetitionTable extends Component {
                 <TableRow
                   key={row._id}
                   hover
-                  onClick={() => handleClickRow(row._id)}
+                  onClick={() => onRowClick(row._id)}
                 >
-                  <TableCell align="right">{row.title}</TableCell>
+                  <TableCell align="right">
+                    <Link href={`/petition/${row._id}`}>
+                      {row.title}
+                    </Link>
+                  </TableCell>
                   <TableCell align="right">{row.to}</TableCell>
                 </TableRow>
               ))}
