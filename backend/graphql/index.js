@@ -65,7 +65,6 @@ const resolvers = {
   Mutation: {
     createPetition: withAuth(async (_, { input }, { user }) => {
       const petition = new PetitionModel({ ...input, ownerId: user._id });
-      console.log('petition: ', petition); // eslint-disable-line
       const newPetition = await petition.save();
       return PetitionModel.findById(newPetition._id);
     }),
