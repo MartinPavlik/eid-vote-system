@@ -45,6 +45,7 @@
     "import/no-webpack-loader-syntax": 0,
     "react/no-multi-comp": 0,
     "react/no-array-index-key": 0,
-    "react/react-in-jsx-scope": 0
+    "react/react-in-jsx-scope": 0,
+    "linebreak-style": 0
   }
 }
