@@ -27,7 +27,7 @@ class App extends Component {
   }
 
   handleListenToStatusChange = () => {
-    this.WebID.listenToStatusChange((status) => {
+    this.WebID.isCardPresentListener((status) => {
       // todo
       console.log(`card present: ${status} `);
     });

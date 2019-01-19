@@ -13,53 +13,65 @@ class WebID {
     this.handshakeCallback = null;
     this.getDataCallback = null;
     this.statusChangeCallback = null;
+    this.getPossibleDataCallback = null;
   }
 
   login(cb) {
     if (this.webSocket.readyState === 1) {
-      console.log('try to login');
       const wsMessage = { cmd: 'handshake', msg: {} };
       this.webSocket.send(JSON.stringify({ ...wsMessage }));
       this.handshakeCallback = cb;
     } else {
-      console.log('connection error');
       cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
     }
   }
 
-  getData(cb, data = ['cardID', 'dokState', 'DokTryLimit', 'DokMaxTryLimit', 'iokState', 'IokMaxTryLimit', 'IokTryLimit', 'serialNumber', 'documentNumber', 'CN', 'surName', 'givenName', 'street', 'locality', 'state', 'country']) {
-    // testWhichIsNotImplemented
+  getData(cb) {
     if (this.webSocket.readyState === 1) {
-      console.log('try to get data');
-      const wsMessage = { cmd: 'get-data', msg: data };
-      this.webSocket.send(JSON.stringify({ ...wsMessage }));
-      this.getDataCallback = cb;
+      this.getPossible((err, msg, signature) => {
+        if(err) {
+          console.log(err);
+          cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
+        }
+        const wsMessage = { cmd: 'getData', msg };
+        this.webSocket.send(JSON.stringify({ ...wsMessage }));
+        this.getDataCallback = cb;
+      });
     } else {
-      console.log('connection error');
       cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
     }
   }
 
-  handshake(message, signature) {
-    this.validateMessage(message, signature)
-      .then(() => this.handshakeCallback && this.handshakeCallback(null, message, signature))
-      .catch((err) => this.handshakeCallback && this.handshakeCallback(err, null, null));
+  getPossible(cb) {
+    if (this.webSocket.readyState === 1) {
+      const wsMessage = { cmd: 'viewAvailableData', msg: null };
+        this.webSocket.send(JSON.stringify({ ...wsMessage }));
+        this.getPossibleDataCallback = cb;
+    } else {
+      cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
+    }
   }
 
-  data(message, signature) {
+  validate(message, signature, cb) {
     this.validateMessage(message, signature)
-      .then(() => this.getDataCallback && this.getDataCallback(null, message, signature))
-      .catch((err) => this.getDataCallback && this.getDataCallback(err, null, null));
+      .then(() => cb !== null && cb(null, message, signature))
+      .catch((err) => cb !== null && cb(err, null, null));
   }
 
-  listenToStatusChange(cb) {
+  confirmMessage(message, signature, cb) {
+    if(cb !== null) {
+      cb(null, message, signature);
+    } else {
+      cb(new Error('callback error'), null, null);
+    }
+  }
+
+  isCardPresentListener(cb) {
     this.statusChangeCallback = cb;
   }
 
   parseEventData(event) {
-    console.log('event', event);
-    const data = JSON.parse(event.data);
-    return data;
+    return JSON.parse(event.data);
   }
 
   setListeners() {
@@ -68,13 +80,15 @@ class WebID {
       console.log(data);
       switch (data.cmd) {
         case 'handshake':
-          this.handshake(data.msg, data.signature);
+          this.validate(data.msg, data.signature, this.handshakeCallback);
           break;
         case 'data':
-          // todo
-          this.data(data.msg, data.signature);
+          this.validate(data.msg, data.signature, this.getDataCallback);
           break;
-        case 'card-present-status':
+        case 'viewAvailableData':
+          this.confirmMessage(data.msg, data.signature, this.getPossibleDataCallback);
+          break;
+        case 'cardPresentStatus':
           this.statusChangeCallback && this.statusChangeCallback(data.msg); // eslint-disable-line
           break;
         default:
@@ -91,7 +105,6 @@ class WebID {
 
   validateMessage(message, signature) {
     return new Promise((resolve, reject) => {
-      console.log('validation');
       const publicKey = message.publicKey;// eslint-disable-line
       const signedMessage = JSON.stringify(message);
       const bufferedMessage = Buffer.from(signedMessage, 'utf8');
