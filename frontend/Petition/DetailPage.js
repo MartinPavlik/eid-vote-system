@@ -1,8 +1,11 @@
 import React, { Component, Fragment } from 'react';
-
+import { pipe, prop, head, defaultTo } from 'ramda';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
+import withTransformProps from 'lib/withTransformProps';
 
 
 const styles = () => ({
@@ -12,20 +15,10 @@ const styles = () => ({
 });
 
 class DetailPage extends Component {
-  state = {
-    petition: {
-      id: 'asdad',
-      title: 'Title',
-      description: 'Desc',
-      from: 'date',
-      to: 'date',
-    },
-  }
-
   render() {
-    const { classes } = this.props;
-    const { petition } = this.state;
+    const { classes, petition } = this.props;
 
+    console.log(this.props);
     return (
       <Fragment>
 
@@ -59,5 +52,46 @@ class DetailPage extends Component {
   }
 }
 
+DetailPage.defaultProps = {
+  petition: {
+    title: '',
+    description: '',
+    from: '',
+    to: '',
+  },
+};
 
-export default withStyles(styles)(DetailPage);
+
+const PetitionByIdQuery = gql`
+  query Petitions($id: ID!) {
+    petitions(_id: $id) {
+      _id
+      title
+      description
+      from
+      to
+    }
+  }
+`;
+
+const withPetitions = graphql(PetitionByIdQuery, {
+  options: ({ petitionId }) => ({
+    variables: {
+      id: petitionId,
+    },
+  }),
+});
+
+export default pipe(
+  withStyles(styles),
+  withTransformProps(ownProps => ({
+    ...ownProps,
+    petition: pipe(
+      prop('data'),
+      prop('petitions'),
+      defaultTo([]),
+      head,
+    )(ownProps),
+  })),
+  withPetitions,
+)(DetailPage);
