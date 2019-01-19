@@ -102,6 +102,16 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
+"@date-io/core@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@date-io/core/-/core-1.0.1.tgz#70624c535f2a53bf7ecefb486fc86e3edecf0078"
+
+"@date-io/date-fns@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@date-io/date-fns/-/date-fns-1.0.1.tgz#2e775fd1184bfb14993601aaef68a153ff21ceeb"
+  dependencies:
+    "@date-io/core" "^1.0.1"
+
 "@material-ui/codemod@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@material-ui/codemod/-/codemod-1.1.0.tgz#0e75b28a086e65746b0203e567770dbb272fe570"
