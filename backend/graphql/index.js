@@ -42,7 +42,7 @@ const typeDefs = `
 
   type Query {
     petitions(_id: ID): [Petition]
-    currentUserId: UserId
+    currentUserId: ID
   }
 
   type Mutation {
