@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "backend:install": "cd backend; yarn run install",
+    "backend:install": "cd backend; yarn install",
     "backend:build:dev": "cd backend; yarn run build:dev;",
     "backend:start:dev": "cd backend; yarn run start:dev;",
     "backend:build": "cd backend; yarn run build",
     "backend:start": "cd backend; yarn run start",
-    "frontend:install": "cd frontend; yarn run install",
+    "frontend:install": "cd frontend; yarn install",
     "frontend:start:dev": "cd frontend; yarn run dev;",
     "frontend:build": "cd frontend; yarn run build",
     "frontend:start": "cd frontend; yarn run start"
