@@ -2,6 +2,7 @@ import { makeExecutableSchema } from 'graphql-tools';
 import * as jwt from '../components/jwt';
 import UserModel from '../models/user';
 import PetitionModel from '../models/petition';
+import PetitionVotesModel from '../models/petitionVote';
 
 const secp256k1 = require('secp256k1');
 
@@ -20,6 +21,15 @@ const typeDefs = `
     from: String!
     owner: User!
     ownerId: ID!
+    votes: [PetitionVote]
+  }
+
+  type PetitionVote {
+    _id: ID!
+    petitionId: ID!
+    user: User!
+    userId: ID!
+    comment: String
   }
 
   input PetitionInput {
@@ -47,6 +57,7 @@ const typeDefs = `
   type Mutation {
     createPetition(input: PetitionInput!): Petition
     login(input:LoginInput!): String
+    vote(petitionId: ID, comment: String): Petition
   }
 `;
 
@@ -59,6 +70,13 @@ const resolvers = {
   },
 
   Mutation: {
+    vote: async (_, { petitionId, comment }) => {
+      const userId = '5c43962cf7f529208f74cb40'; // todo
+      const vote = { petitionId, userId, comment };
+      const petitionVote = new PetitionVotesModel({ ...vote });
+      await petitionVote.save();
+      return PetitionModel.findById(petitionId);
+    },
     createPetition: async (_, { input }) => {
       // TODO - inject owner id
       console.log('input: ', input); // eslint-disable-line
@@ -119,6 +137,13 @@ const resolvers = {
   Petition: {
     owner: (petition) =>
       UserModel.findById(petition.ownerId),
+    votes: (petition) =>
+      PetitionVotesModel.find({ petitionId: petition.id }).exec(),
+  },
+
+  PetitionVote: {
+    user: (petitionVote) =>
+      UserModel.findById(petitionVote.userId),
   },
 };
 

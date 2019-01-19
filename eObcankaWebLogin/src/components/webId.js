@@ -62,7 +62,8 @@ class WebID {
     if(cb !== null) {
       cb(null, message, signature);
     } else {
-      cb(new Error('callback error'), null, null);
+      //throw new Error('callback is not defined');
+      console.log('callback is not defined');
     }
   }
 
@@ -80,10 +81,10 @@ class WebID {
       console.log(data);
       switch (data.cmd) {
         case 'handshake':
-          this.validate(data.msg, data.signature, this.handshakeCallback);
+          this.confirmMessage(data.msg, data.signature, this.handshakeCallback);
           break;
         case 'data':
-          this.validate(data.msg, data.signature, this.getDataCallback);
+          this.confirmMessage(data.msg, data.signature, this.getDataCallback);
           break;
         case 'viewAvailableData':
           this.confirmMessage(data.msg, data.signature, this.getPossibleDataCallback);
