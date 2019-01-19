@@ -124,8 +124,16 @@ class CreatePetitionForm extends Component {
       form: newForm,
     });
 
+
+    const newFrom = new Date(values.from);
+    const newTo = new Date(values.to);
+
     if (hasError) return;
-    onSubmit(values).then(console.log);
+    onSubmit({
+      ...values,
+      from: newFrom.toISOString(),
+      to: newTo.toISOString(),
+    }).then(console.log);
   }
 
   render() {
