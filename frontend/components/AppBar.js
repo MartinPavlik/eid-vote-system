@@ -1,6 +1,7 @@
 // @flow
 import * as React from 'react';
 // import UserIcon from 'User/UserIcon';
+import Link from 'components/Link';
 import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => {
@@ -18,7 +19,7 @@ const styles = theme => {
 
 const AppBar = ({ classes }): React.Node => (
   <div className={classes.base}>
-    TODO
+    <Link href="/login" style={{ color: 'white' }}>Login</Link>
   </div>
 );
 
