@@ -8,6 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Link from 'components/Link';
+import { parseIsoDateToString } from '../utils';
 
 
 const CustomTableCell = withStyles(theme => ({
@@ -57,7 +58,7 @@ class PetitionTable extends Component {
                       {row.title}
                     </Link>
                   </TableCell>
-                  <TableCell align="right">{row.to}</TableCell>
+                  <TableCell align="right">{parseIsoDateToString(row.to)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
