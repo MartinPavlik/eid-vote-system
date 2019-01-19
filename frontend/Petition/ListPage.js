@@ -1,5 +1,7 @@
 import React, { Component, Fragment } from 'react';
-
+import { pipe } from 'ramda';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/core/styles';
 import PetitionTable from './components/PetitionTable';
@@ -18,7 +20,7 @@ class ListPage extends Component {
 
 
   render() {
-    const { classes } = this.props;
+    const { classes, data: { petitions } } = this.props;
 
     return (
       <Fragment>
@@ -29,37 +31,8 @@ class ListPage extends Component {
 
         <div className={classes.row}>
           <PetitionTable
-            handleClickRow={this.handleClickRow}
-            rows={[
-              {
-                _id: 'dasd',
-                title: 'pepa',
-                description: '',
-                from: 'dare',
-                to: 'sss',
-              },
-              {
-                _id: 'davxcvsd',
-                title: 'pepa',
-                description: '',
-                from: 'dare',
-                to: 'sss',
-              },
-              {
-                _id: 'dsdafasd',
-                title: 'pepa',
-                description: '',
-                from: 'dare',
-                to: 'sss',
-              },
-              {
-                _id: 'dadasdgfdsd',
-                title: 'pepa',
-                description: '',
-                from: 'dare',
-                to: 'sss',
-              },
-            ]}
+            onRowClick={this.handleClickRow}
+            rows={petitions || []}
           />
         </div>
 
@@ -68,5 +41,21 @@ class ListPage extends Component {
   }
 }
 
+const PetitionsQuery = gql`
+  query Petitions {
+    petitions {
+      _id
+      title
+      description
+      from
+      to
+    }
+  }
+`;
 
-export default withStyles(styles)(ListPage);
+const withPetitions = graphql(PetitionsQuery);
+
+export default pipe(
+  withStyles(styles),
+  withPetitions,
+)(ListPage);

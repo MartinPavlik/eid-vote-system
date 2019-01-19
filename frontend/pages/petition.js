@@ -6,10 +6,10 @@ import withData from 'lib/withData';
 import DetailPage from 'Petition/DetailPage';
 
 
-const PetitionDetailPage = () => (
+const PetitionDetailPage = (props) => (
   <BaseLayout title="Petition detail">
     <Layout>
-      <DetailPage />
+      <DetailPage petitionId={props.url.query.petitionId} />
     </Layout>
   </BaseLayout>
 );
