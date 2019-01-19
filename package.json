@@ -1,0 +1,28 @@
+{
+  "name": "screen-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "backend:install": "cd backend; yarn run install",
+    "backend:build:dev": "cd backend; yarn run build:dev;",
+    "backend:start:dev": "cd backend; yarn run start:dev;",
+    "backend:build": "cd backend; yarn run build",
+    "backend:start": "cd backend; yarn run start",
+    "frontend:install": "cd frontend; yarn run install",
+    "frontend:start:dev": "cd frontend; yarn run dev;",
+    "frontend:build": "cd frontend; yarn run build",
+    "frontend:start": "cd frontend; yarn run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/screen-development/client.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/screen-development/client/issues"
+  },
+  "homepage": "https://gitlab.com/screen-development/client#README",
+  "dependencies": {}
+}

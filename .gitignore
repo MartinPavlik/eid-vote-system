@@ -1,0 +1,16 @@
+yarn-error.log
+# Distribution
+build/
+
+# Dependency directories
+node_modules
+**/node_modules
+**/dist
+**/build
+npm-debug.log
+
+# Desktop Services Store on macOS
+.DS_Store
+
+# Next build
+frontend/.next
