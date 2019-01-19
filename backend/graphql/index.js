@@ -2,6 +2,8 @@ import { makeExecutableSchema } from 'graphql-tools';
 import UserModel from '../models/user';
 import PetitionModel from '../models/petition';
 
+const secp256k1 = require('secp256k1');
+
 // const eccrypto = require('eccrypto');
 
 const typeDefs = `
@@ -77,7 +79,8 @@ const resolvers = {
       console.log('certificate', certificate);
       console.log('documentNumber', documentNumber);
       console.log('signature', signature);
-      // const verified = eccrypto.verify(message.publicKey, message, signature);
+
+      console.log(secp256k1.verify(message, signature, publicKey));
 
       // console.log('verified: ', verified);
       // TOOD - generate JWT token here and return it
