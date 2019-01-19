@@ -28,8 +28,8 @@ class WebID {
 
   getData(cb) {
     if (this.webSocket.readyState === 1) {
-      this.getPossible((err, msg, signature) => {
-        if(err) {
+      this.getPossible((err, msg /* signature */) => {
+        if (err) {
           console.log(err);
           cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
         }
@@ -45,8 +45,8 @@ class WebID {
   getPossible(cb) {
     if (this.webSocket.readyState === 1) {
       const wsMessage = { cmd: 'viewAvailableData', msg: null };
-        this.webSocket.send(JSON.stringify({ ...wsMessage }));
-        this.getPossibleDataCallback = cb;
+      this.webSocket.send(JSON.stringify({ ...wsMessage }));
+      this.getPossibleDataCallback = cb;
     } else {
       cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
     }
@@ -59,10 +59,10 @@ class WebID {
   }
 
   confirmMessage(message, signature, cb) {
-    if(cb !== null) {
+    if (cb) {
       cb(null, message, signature);
     } else {
-      cb(new Error('callback error'), null, null);
+      // cb(new Error('callback error'), null, null);
     }
   }
 
@@ -80,7 +80,7 @@ class WebID {
       console.log(data);
       switch (data.cmd) {
         case 'handshake':
-          this.validate(data.msg, data.signature, this.handshakeCallback);
+          this.confirmMessage(data.msg, data.signature, this.handshakeCallback);
           break;
         case 'data':
           this.validate(data.msg, data.signature, this.getDataCallback);

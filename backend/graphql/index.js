@@ -2,8 +2,8 @@ import { makeExecutableSchema } from 'graphql-tools';
 import * as jwt from '../components/jwt';
 import UserModel from '../models/user';
 import PetitionModel from '../models/petition';
-
-const secp256k1 = require('secp256k1');
+import withAuth from './withAuth';
+// const secp256k1 = require('secp256k1');
 
 const typeDefs = `
   type User {
@@ -59,17 +59,12 @@ const resolvers = {
   },
 
   Mutation: {
-    createPetition: async (_, { input }) => {
-      // TODO - inject owner id
-      console.log('input: ', input); // eslint-disable-line
-      const petition = new PetitionModel(input);
-
+    createPetition: withAuth(async (_, { input }, { user }) => {
+      const petition = new PetitionModel({ ...input, ownerId: user._id });
       console.log('petition: ', petition); // eslint-disable-line
       const newPetition = await petition.save();
-      console.log('newPetition: ', newPetition); // eslint-disable-line
-
       return PetitionModel.findById(newPetition._id);
-    },
+    }),
     login: async (_, { input }) => {
       // TODO
       const {
@@ -87,7 +82,6 @@ const resolvers = {
       console.log('documentNumber', documentNumber);
       console.log('signature', signature);
 
-
       const messageAsString = JSON.stringify(message);
 
       console.log('message as string', messageAsString);
@@ -96,9 +90,8 @@ const resolvers = {
 
       console.log('message as buffer', messageAsBuffer);
 
-
       // TODO - verify
-      console.log(secp256k1.verify(messageAsBuffer, signature, publicKey));
+      // console.log(secp256k1.verify(messageAsBuffer, signature, publicKey));
 
 
       console.log('DONE');
