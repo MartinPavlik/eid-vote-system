@@ -42,6 +42,7 @@ const typeDefs = `
 
   type Query {
     petitions(_id: ID): [Petition]
+    currentUserId: UserId
   }
 
   type Mutation {
@@ -56,6 +57,9 @@ const resolvers = {
       const filter = _id ? { _id } : {};
       return PetitionModel.find(filter).exec();
     },
+    currentUserId: withAuth(async (_, __, { user }) =>
+      user._id,
+    ),
   },
 
   Mutation: {
