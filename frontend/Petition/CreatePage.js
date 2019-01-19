@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
-
+import { Mutation } from 'react-apollo';
+import gql from 'graphql-tag';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
@@ -15,7 +16,7 @@ const styles = () => ({
   },
 });
 
-class CreatePage extends Component {
+class CreatePetitionForm extends Component {
   constructor(props) {
     super(props);
 
@@ -96,15 +97,22 @@ class CreatePage extends Component {
     });
   }
 
-  handleCongirm = () => {
+  handleConfirm = () => {
+    const { onSubmit } = this.props;
     const { form, values } = this.state;
 
     const newForm = { ...form };
     const keys = Object.keys(form);
 
+    let hasError = false;
+
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
       const error = this.validateForm(newForm[key], values[key]);
+
+      if (error.error) {
+        hasError = true;
+      }
 
       newForm[key] = {
         ...newForm[key],
@@ -115,9 +123,13 @@ class CreatePage extends Component {
     this.setState({
       form: newForm,
     });
+
+    if (hasError) return;
+    onSubmit(values).then(console.log);
   }
 
   render() {
+    console.log('props::', this.props);
     const { values, form } = this.state;
     const { classes } = this.props;
 
@@ -193,7 +205,7 @@ class CreatePage extends Component {
         </div>
 
         <div className={classes.row}>
-          <Button onClick={this.handleCongirm} variant="contained" color="primary">
+          <Button onClick={this.handleConfirm} variant="contained" color="primary">
             Vytvořit
           </Button>
         </div>
@@ -203,5 +215,40 @@ class CreatePage extends Component {
   }
 }
 
+const CreatePetitionFormWithStyles = withStyles(styles)(CreatePetitionForm);
 
-export default withStyles(styles)(CreatePage);
+const createPetitionMutation = gql`
+  mutation createPetition($input: PetitionInput!) {
+    createPetition(input: $input) {
+      _id
+      title
+      description
+      from
+      to
+    }
+  }
+`;
+
+const CreatePage = () => (
+  <Mutation
+    mutation={createPetitionMutation}
+  >
+    {(createPetition, { data }) => (
+      <div>
+        <CreatePetitionFormWithStyles
+          onSubmit={input => {
+            return createPetition({
+              variables: {
+                input,
+              },
+            });
+          }}
+          data={data}
+        />
+      </div>
+    )}
+  </Mutation>
+);
+
+
+export default CreatePage;
