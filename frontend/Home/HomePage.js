@@ -45,7 +45,6 @@ class Home extends Component {
               reverse,
               take(5),
             )(petitions)
-            || []
           }
         />
 
@@ -53,6 +52,10 @@ class Home extends Component {
     );
   }
 }
+
+Home.defaultProps = {
+  petitions: [],
+};
 
 const PetitionsQuery = gql`
   query Petitions {
