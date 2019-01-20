@@ -9,7 +9,7 @@ import PetitionTable from '../Petition/components/PetitionTable';
 
 const styles = () => ({
   intro: {
-    background: 'url(http://www.ucho24.cz/img/_antialias_551f05d2-1dce-4db1-aed0-918dcac959b6_cs_a9899c0b01ae4f151fc310774877e299.jpg) no-repeat center center',
+    background: 'url(https://facingtoday.facinghistory.org/hs-fs/hubfs/Listenwise%20Lower%20Voting%20Age.jpg?width=4606&name=Listenwise%20Lower%20Voting%20Age.jpg&fbclid=IwAR1QDTCMwVPbXY_9XhzPPYs9GGmIf7s1eBRyVe6k6fonsgploK9RVQB8k2w) no-repeat center center',
     backgroundSize: '100% 100%',
     height: 400,
     color: 'block',
@@ -17,6 +17,7 @@ const styles = () => ({
     paddingTop: '1em',
     paddingLeft: '1em',
     marginBottom: 25,
+    borderRadius: '5px',
   },
   logo: {
     height: 100,
