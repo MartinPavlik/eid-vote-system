@@ -20,14 +20,16 @@ class Login extends Component {
     }
   }
 
-  handleLogin = () => {
+  handleLogin = async () => {
     const { onLogin } = this.props;
     this.setState({ error: null, isLoading: true });
-    this.WebID.login((error, message, signature) => {
-      console.log('login: error', error);
-      console.log('login: message', message);
-      console.log('login: signature', signature);
-      /*
+    try {
+      const loginData = await this.WebID.login();
+      console.log('login data', loginData);
+    } catch (err) {
+      console.log(err);
+    }
+    /*
       if (error) {
         this.setState({
           error: error.message,
@@ -40,36 +42,27 @@ class Login extends Component {
       const { documentNumber, shortCert, publicKey } = message;
       */
 
-      const fakeMessage = {
-        documentNumber: 'fake doc num',
-        certificate: 'fake cert',
-        publicKey: 'fake pub key',
-      };
+    const fakeMessage = {
+      documentNumber: 'fake doc num',
+      certificate: 'fake cert',
+      publicKey: 'fake pub key',
+    };
 
-      const fakeSignature = 'fake sign';
+    const fakeSignature = 'fake sign';
 
-      onLogin({
-        message: fakeMessage,
-        signature: fakeSignature,
-      }).then(token => {
-        console.log('token::', token);
-        setToken(token);
-        redirect('/');
-      }).catch(e => {
-        console.log('Error: ', e);
-        this.setState({
-          error: 'Can not log in',
-          isLoading: false,
-        });
+    onLogin({
+      message: fakeMessage,
+      signature: fakeSignature,
+    }).then(token => {
+      console.log('token::', token);
+      setToken(token);
+      redirect('/');
+    }).catch(e => {
+      console.log('Error: ', e);
+      this.setState({
+        error: 'Can not log in',
+        isLoading: false,
       });
-    });
-  }
-
-  handleGetData = () => {
-    this.WebID.getData((err, message, signature) => {
-      console.log('error', err);
-      console.log('messsage', message);
-      console.log('signature', signature);
     });
   }
 

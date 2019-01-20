@@ -1,116 +1,128 @@
 import * as ecCrypto from 'eccrypto';
 
-const webSocketUrl = 'ws://192.168.51.154:8080/websocket/msg';
+const REQUEST_TYPE = {
+  HANDSHAKE: 'handshake',
+  CARD_PRESENT_STATUS: 'cardPresentStatus',
+  VIEW_AVAILABLE_DATA: 'viewAvailableData',
+  DATA: 'data',
+};
 
 class WebID {
 
-  constructor() {
+  constructor(webSocketUrl = 'ws://192.168.51.154:8080/websocket/msg') {
+    this.webSocketUrl = webSocketUrl;
     this.webSocket = new WebSocket(webSocketUrl);
     this.setListeners();
-    this.handshakeData = null;
-    this.message = null;
-    this.signature = null;
-    this.handshakeCallback = null;
-    this.getDataCallback = null;
-    this.statusChangeCallback = null;
-    this.getPossibleDataCallback = null;
-  }
+    this.activeRequest = false;
+    this.request = { cmd: null, resolve: null, reject: null };
+    this.isCardPresent = { callback: null };
 
-  login(cb) {
-    if (this.webSocket.readyState === 1) {
-      const wsMessage = { cmd: 'handshake', msg: {} };
-      this.webSocket.send(JSON.stringify({ ...wsMessage }));
-      this.handshakeCallback = cb;
-    } else {
-      cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
-    }
-  }
-
-  getData(cb) {
-    if (this.webSocket.readyState === 1) {
-      this.getPossible((err, msg, signature) => {
-        if(err) {
-          console.log(err);
-          cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
-        }
-        const wsMessage = { cmd: 'getData', msg };
-        this.webSocket.send(JSON.stringify({ ...wsMessage }));
-        this.getDataCallback = cb;
-      });
-    } else {
-      cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
-    }
-  }
-
-  getPossible(cb) {
-    if (this.webSocket.readyState === 1) {
-      const wsMessage = { cmd: 'viewAvailableData', msg: null };
-        this.webSocket.send(JSON.stringify({ ...wsMessage }));
-        this.getPossibleDataCallback = cb;
-    } else {
-      cb({ msg: 'connection error', readyState: this.webSocket.readyState }, null, null);
-    }
-  }
-
-  validate(message, signature, cb) {
-    this.validateMessage(message, signature)
-      .then(() => cb !== null && cb(null, message, signature))
-      .catch((err) => cb !== null && cb(err, null, null));
-  }
-
-  confirmMessage(message, signature, cb) {
-    if(cb !== null) {
-      cb(null, message, signature);
-    } else {
-      //throw new Error('callback is not defined');
-      console.log('callback is not defined');
-    }
-  }
-
-  isCardPresentListener(cb) {
-    this.statusChangeCallback = cb;
   }
 
   parseEventData(event) {
     return JSON.parse(event.data);
   }
 
+  isCardPresentListener(cb) {
+    this.isCardPresent.callback = cb;
+  }
+
   setListeners() {
     this.webSocket.onmessage = (event) => {
       const data = this.parseEventData(event);
       console.log(data);
-      switch (data.cmd) {
-        case 'handshake':
-          this.confirmMessage(data.msg, data.signature, this.handshakeCallback);
-          break;
-        case 'data':
-          this.confirmMessage(data.msg, data.signature, this.getDataCallback);
-          break;
-        case 'viewAvailableData':
-          this.confirmMessage(data.msg, data.signature, this.getPossibleDataCallback);
-          break;
-        case 'cardPresentStatus':
-          this.statusChangeCallback && this.statusChangeCallback(data.msg); // eslint-disable-line
-          break;
-        default:
-          console.log('unknown cmd');
+      if (event.cmd === REQUEST_TYPE.CARD_PRESENT_STATUS) {
+        this.isCardPresent.callback !== null && this.isCardPresent.callback(event.msg); // eslint-disable-line
+      } else {
+        this.getResponse(data.cmd, data.msg, data.signature);
       }
     };
-    this.webSocket.onclose = (event) => {
-      console.log(event);
+    this.webSocket.onclose = () => {
       setTimeout(() => {
-        this.webSocket = new WebSocket(webSocketUrl);
+        this.webSocket = new WebSocket(this.webSocketUrl);
       }, 5000);
     };
   }
 
+  async sign() {
+    // todo on java library
+    return this.login();
+  }
+
+  async login() {
+    try {
+      const handshakeDataResponse = await this.sendRequest(REQUEST_TYPE.HANDSHAKE, null);
+      console.log(handshakeDataResponse);
+      const signData = handshakeDataResponse.message;
+      const signSignature = handshakeDataResponse.signature;
+      const signCertificate = handshakeDataResponse.message.shortCert;
+      return Promise.resolve({ signData, signSignature, signCertificate });
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  async register() {
+    try {
+      // todo verification long certificate
+      const handshakeDataResponse = await this.sendRequest(REQUEST_TYPE.HANDSHAKE, null);
+      const loginData = handshakeDataResponse.message;
+      const loginSignature = handshakeDataResponse.signature;
+      const loginCertificate = handshakeDataResponse.message.shortCert;
+      const availableDataResponse = await this.sendRequest(REQUEST_TYPE.VIEW_AVAILABLE_DATA, null);
+      console.log(availableDataResponse);
+      const availableData = availableDataResponse.message;
+      const receivedDataResponse = await this.sendRequest(REQUEST_TYPE.DATA, availableData);
+      const receivedData = receivedDataResponse.message;
+      return Promise.resolve({
+        loginData, loginSignature, loginCertificate, receivedData,
+      });
+    } catch (err) {
+      return Promise.reject(err);
+    }
+  }
+
+  getResponse(command, message, signature) {
+    this.activeRequest = false;
+    const { cmd, resolve, reject } = this.request;
+    if (cmd === command) {
+      resolve && resolve({ message, signature });
+    } else {
+      reject && reject(new Error('invalid command'));
+    }
+  }
+
+  sendRequest(cmd, msg) {
+    if (this.activeRequest) {
+      return Promise.reject(new Error('Other pending request...'));
+    }
+    this.activeRequest = true;
+    return new Promise((resolve, reject) => {
+      this.request = { cmd, resolve, reject };
+      this.webSocket.send(JSON.stringify({ cmd, msg }));
+      this.setTimeout(resolve, reject, 1000);
+    });
+  }
+
+  setTimeout(resolve, reject, timeout){
+    setTimeout(() => {
+      this.activeRequest = false;
+      this.request.resolve = null;
+      this.request.reject = null;
+      this.request.cmd = null;
+      resolve({ msg: null, signature: null });
+      // todo reject
+    }, timeout);
+  }
+
   validateMessage(message, signature) {
+    // todo signing on java client
     return new Promise((resolve, reject) => {
       const publicKey = message.publicKey;// eslint-disable-line
       const signedMessage = JSON.stringify(message);
       const bufferedMessage = Buffer.from(signedMessage, 'utf8');
       ecCrypto.verify(publicKey, bufferedMessage, signature)
-        .then(() => resolve(true))
+        .then(() => resolve())
         .catch(() => reject(new Error('Can not verify message')));// eslint-disable-line
     });
   }

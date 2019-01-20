@@ -5,7 +5,6 @@ import { pipe } from 'ramda';
 import withData from 'lib/withData';
 import Login from 'WebId/Login';
 
-
 const LoginPage = () => (
   <BaseLayout title="Petitions">
     <Layout>

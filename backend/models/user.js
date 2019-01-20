@@ -13,6 +13,12 @@ const userSchema = new Schema({
   name: {
     type: String,
   },
+  birthdate: {
+    type: String,
+  },
+  sex: {
+    type: String,
+  },
 }, {
   collection: 'user',
   timestamps: true,

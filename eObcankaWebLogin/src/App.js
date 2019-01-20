@@ -8,36 +8,34 @@ class App extends Component {
     this.WebID = new WebID();
   }
 
-  login = (e) => {
-    this.WebID.login((err, message, signature) => {
-      console.log(err);
-      console.log(message);
-      console.log(signature)
-    });
+  register = async (e) => {
+    const data = await this.WebID.register();
+    console.log(data);
   }
 
-  getData = (e) => {
-    this.WebID.getData((err, message, signature) => {
-      console.log(err);
-      console.log(message);
-      console.log(signature)
-    });
+  login = async (e) => {
+    const data = await this.WebID.login();
+    console.log(data);
   }
 
-  listenToStatusChange = (e) => {
+  sign = async (e) => {
+    const data = await this.WebID.sign();
+    console.log(data);
+  }
+
+  isCardPresentListener = (e) => {
     this.WebID.isCardPresentListener((status) => {
-      // todo
       console.log(`card present: ${status} `);
     });
   }
 
   render() {
-    this.listenToStatusChange();
+    this.isCardPresentListener();
     return (
       <div className="App">
         <button onClick={this.login}> LOGIN </button>
-        <button onClick={this.getData}> GET DATA </button>
-
+        <button onClick={this.register}> REGISTER </button>
+        <button onClick={this.sign}> SIGN </button>
       </div>
     );
   }
