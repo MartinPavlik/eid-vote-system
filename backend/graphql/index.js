@@ -146,6 +146,9 @@ const resolvers = {
   Petition: {
     // TODO
     userHasAlreadyVoted: withAuth(false)(async (petition, _, { user }) => {
+      if (!user) {
+        return false;
+      }
       const maybeVote = await PetitionVotesModel.findOne({ userId: user._id }).exec();
       return Boolean(maybeVote);
     }),

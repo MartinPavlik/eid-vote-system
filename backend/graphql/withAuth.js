@@ -2,6 +2,7 @@ import { getAuthorizedUser } from '../components/jwt';
 
 const withAuth = (required = true) => (handler) =>
   async (parent, args, context, info) => {
+    console.log('withAuth: isRequired', required); // eslint-disable-line
     const { user } = context;
     if (user) {
       // Looks like user was already injected...
@@ -20,13 +21,16 @@ const withAuth = (required = true) => (handler) =>
         info,
       );
     } catch (e) {
-      console.log('withAuth error: ', e); // eslint-disable-line
+      if (required) {
+        console.log('withAuth error: ', e); // eslint-disable-line
+      }
       // Not interested in the error anyway
     }
 
     if (required) {
       throw new Error('Not authorized');
     } else {
+      console.log('withAuth: not required, calling next');
       return handler(parent, args, context, info);
     }
   };
