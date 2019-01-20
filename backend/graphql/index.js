@@ -12,6 +12,7 @@ const typeDefs = `
     _id: ID!
     documentNumber: String!
     name: String
+    sex: String
   }
 
   type Petition {
@@ -29,6 +30,7 @@ const typeDefs = `
   type PetitionVote {
     _id: ID!
     petitionId: ID!
+    age: Int
     user: User!
     userId: ID!
     comment: String
@@ -82,7 +84,7 @@ const resolvers = {
       const selectedUser = await UserModel.findById(user._id);
 
       const userId = selectedUser._id;
-      const age = Math.round((Math.rand() * 100));
+      const age = Math.round((Math.random() * 100));
       const sex = 'M';
 
       const vote = {
@@ -147,7 +149,7 @@ const resolvers = {
     owner: (petition) =>
       UserModel.findById(petition.ownerId),
     votes: (petition) =>
-      PetitionVotesModel.find({ petitionId: petition.id }).exec(),
+      PetitionVotesModel.find({ petitionId: petition._id }).exec(),
   },
 
   PetitionVote: {

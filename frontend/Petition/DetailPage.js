@@ -33,31 +33,31 @@ const styles = () => ({
 });
 
 class DetailPage extends Component {
-  parseVotes = (users) => {
+  parseVotes = (votes) => {
     const ret = {
       sex: [0, 0],
       count: 0,
       ages: [0, 0, 0, 0, 0],
     };
 
-    for (let i = 0; i < users.length; i++) {
-      const user = users[i];
-      if (user.sex === 'M') {
+    for (let i = 0; i < votes.length; i++) {
+      const vote = votes[i];
+      if (vote.user.sex === 'M') {
         ret.sex[1]++;
       } else {
         ret.sex[0]++;
       }
 
-      if (user.age < 25) {
-        ret.age[0]++;
-      } else if (user.age < 35) {
-        ret.age[1]++;
-      } else if (user.age < 50) {
-        ret.age[2]++;
-      } else if (user.age < 65) {
-        ret.age[3]++;
+      if (vote.age < 25) {
+        ret.ages[0]++;
+      } else if (vote.age < 35) {
+        ret.ages[1]++;
+      } else if (vote.age < 50) {
+        ret.ages[2]++;
+      } else if (vote.age < 65) {
+        ret.ages[3]++;
       } else {
-        ret.age[4]++;
+        ret.ages[4]++;
       }
     }
 
@@ -116,7 +116,7 @@ class DetailPage extends Component {
     const to = parseIsoDateToString(petition.to);
 
 
-    const chartData = this.parseVotes([]);
+    const chartData = this.parseVotes(petition.votes);
 
     console.log(this.props);
     return (
@@ -155,7 +155,7 @@ class DetailPage extends Component {
             Hlasovalo celkem
           </div>
           <div>
-            55
+            {petition.votes.length}
           </div>
         </div>
 
@@ -188,6 +188,7 @@ DetailPage.defaultProps = {
     description: '',
     from: '',
     to: '',
+    votes: [],
   },
 };
 
@@ -198,6 +199,15 @@ const PetitionFragment = gql`
     description
     from
     to
+    votes {
+      _id
+      petitionId
+      age
+      userId
+      user {
+        sex
+      }
+    }
   }
 `;
 
@@ -228,7 +238,7 @@ const withPetitions = graphql(PetitionByIdQuery, {
 });
 
 const withVote = graphql(VoteMutation, {
-  options: (({ mutate }) => ({
+  props: (({ mutate }) => ({
     onVote: (petitionId) => mutate({ variables: { petitionId } }),
   })),
 });

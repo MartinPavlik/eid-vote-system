@@ -18,6 +18,9 @@ const petitionVoteSchema = new Schema({
     type: String,
     default: '',
   },
+  age: {
+    type: Number,
+  },
 }, {
   collection: 'petitionVote',
   timestamps: true,
