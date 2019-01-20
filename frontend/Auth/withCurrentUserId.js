@@ -1,7 +1,7 @@
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
 
-const currentUserIdQuery = gql`
+export const currentUserIdQuery = gql`
   query currentUserId {
     currentUserId
   }
@@ -13,7 +13,6 @@ const withCurrentUserId = graphql(
     props: ({ data: { currentUserId } }) => ({
       currentUserId,
     }),
-    fetchPolicy: 'network-only',
   },
 );
 

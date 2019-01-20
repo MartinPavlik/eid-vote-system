@@ -8,6 +8,8 @@ import ws from 'ws';
 
 let apolloClient = null;
 
+export const getApolloClient = () => apolloClient;
+
 export default function initApollo(cache, context) {
   const transportClient = new SubscriptionClient(
     GRAPHQL_URL_WS, {
