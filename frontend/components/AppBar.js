@@ -5,26 +5,48 @@ import { pipe } from 'ramda';
 import Link from 'components/Link';
 import { withStyles } from '@material-ui/core/styles';
 import withCurrentUserId from 'Auth/withCurrentUserId';
+import Button from '@material-ui/core/Button';
+
 
 const styles = theme => {
   return {
     base: {
       display: 'flex',
       flex: 1,
+      height: '100%',
       // background: theme.palette.appBar.main,
       padding: `${theme.spacing.unit}px ${theme.spacing.unit * 4}px`,
       alignItems: 'center',
-      justifyContent: 'flex-end',
+    },
+    link: {
+      textDecoration: 'none',
     },
   };
 };
 
 const AppBar = ({ classes, currentUserId }): React.Node => (
   <div className={classes.base}>
+
+    <Button color="primary">
+      <Link className={classes.link} href="/petitions" style={{ color: 'white' }}>Domů</Link>
+    </Button>
+
+    <Button color="primary">
+      <Link className={classes.link} href="/petitions" style={{ color: 'white' }}>Petice</Link>
+    </Button>
+
     {currentUserId &&
-      <Link href="/create-petition" style={{ color: 'white' }}>Vytvořit petici</Link>
+      <Button color="primary">
+        <Link className={classes.link} href="/create-petition" style={{ color: 'white' }}>Vytvořit petici</Link>
+      </Button>
     }
-    <Link href="/login" style={{ color: 'white' }}>Login</Link>
+
+    {!currentUserId &&
+      <Button color="primary" style={{ marginLeft: 'auto' }}>
+        <Link className={classes.link} href="/login" style={{ color: 'white' }}>Login</Link>
+      </Button>
+    }
+
   </div>
 );
 

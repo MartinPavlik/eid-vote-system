@@ -13,7 +13,7 @@ import { parseIsoDateToString } from '../utils';
 
 const CustomTableCell = withStyles(theme => ({
   head: {
-    backgroundColor: theme.palette.common.black,
+    backgroundColor: '#2b3d51',
     color: theme.palette.common.white,
   },
   body: {

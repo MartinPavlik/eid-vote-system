@@ -37,12 +37,17 @@ const Layout = ({
           width: 70%;
           margin: 0 auto;
         }
+
+        .appbar {
+          width: 70%;
+          margin: 0 auto;
+        }
       `
     }
     </style>
     <div className="container">
       <div className="topbar">
-        <div className="content">
+        <div className="appbar">
           <AppBar />
         </div>
       </div>
