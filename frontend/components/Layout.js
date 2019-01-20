@@ -36,7 +36,6 @@ const Layout = ({
           padding: 2rem;
           width: 70%;
           margin: 0 auto;
-          display: flex;
         }
       `
     }
