@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { pipe } from 'ramda';
+import Link from 'components/Link';
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
 import FormControl from '@material-ui/core/FormControl';
@@ -10,7 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import redirect from 'lib/redirect';
-
+import withCurrentUserId from 'Auth/withCurrentUserId';
 
 const styles = () => ({
   row: {
@@ -143,7 +144,20 @@ class CreatePetitionForm extends Component {
 
   render() {
     const { values, form } = this.state;
-    const { classes } = this.props;
+    const { classes, currentUserId } = this.props;
+
+    console.log('this.props: ', this.props); // eslint-disable-line
+
+    // TODO - ui
+    if (!currentUserId) {
+      return (
+        <Typography>
+          Only logged in users can create petitions, please{' '}
+          <Link href="/login">login</Link>.
+        </Typography>
+      );
+    }
+
 
     return (
       <Fragment>
@@ -240,11 +254,13 @@ const createPetitionMutation = gql`
 `;
 
 export default pipe(
+  withCurrentUserId,
   withStyles(styles),
   graphql(
     createPetitionMutation,
     {
-      props: ({ mutate }) => ({
+      props: ({ mutate, ...rest }) => ({
+        ...rest,
         onSubmit: input =>
           mutate({
             variables: {

@@ -1,6 +1,6 @@
 import { getAuthorizedUser } from '../components/jwt';
 
-const withAuth = (handler) =>
+const withAuth = (required = true) => (handler) =>
   async (parent, args, context, info) => {
     const { user } = context;
     if (user) {
@@ -24,7 +24,11 @@ const withAuth = (handler) =>
       // Not interested in the error anyway
     }
 
-    throw new Error('Not authorized');
+    if (required) {
+      throw new Error('Not authorized');
+    } else {
+      return handler(parent, args, context, info);
+    }
   };
 
 export default withAuth;

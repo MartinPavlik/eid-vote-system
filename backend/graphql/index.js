@@ -18,6 +18,7 @@ const typeDefs = `
     description: String!
     to: String!
     from: String!
+    hasUserAlreadyVoted: Boolean!
     owner: User!
     ownerId: ID!
   }
@@ -57,13 +58,13 @@ const resolvers = {
       const filter = _id ? { _id } : {};
       return PetitionModel.find(filter).exec();
     },
-    currentUserId: withAuth(async (_, __, { user }) =>
+    currentUserId: withAuth(false)(async (_, __, { user }) =>
       user._id,
     ),
   },
 
   Mutation: {
-    createPetition: withAuth(async (_, { input }, { user }) => {
+    createPetition: withAuth(true)(async (_, { input }, { user }) => {
       const petition = new PetitionModel({ ...input, ownerId: user._id });
       const newPetition = await petition.save();
       return PetitionModel.findById(newPetition._id);
@@ -113,6 +114,8 @@ const resolvers = {
   },
 
   Petition: {
+    // TODO
+    hasUserAlreadyVoted: () => false,
     owner: (petition) =>
       UserModel.findById(petition.ownerId),
   },
