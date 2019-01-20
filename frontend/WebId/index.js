@@ -10,8 +10,7 @@ const REQUEST_TYPE = {
 
 class WebID {
 
-  constructor(webSocketUrl = 'ws://192.168.51.19:6969/websocket/msg') {
-
+  constructor(webSocketUrl = 'ws://192.168.51.154:6969/websocket/msg') {
     this.webSocketUrl = webSocketUrl;
     this.webSocket = new WebSocket(webSocketUrl);
     this.setListeners();
