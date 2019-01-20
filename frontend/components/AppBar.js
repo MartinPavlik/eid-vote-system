@@ -27,9 +27,9 @@ const styles = theme => {
 const AppBar = ({ classes, currentUserId }): React.Node => (
   <div className={classes.base}>
 
-    <Button color="primary">
-      <Link className={classes.link} href="/petitions" style={{ color: 'white' }}>Domů</Link>
-    </Button>
+    <span>
+      <Link className={classes.link} href="/" style={{ color: 'white' }}><img height={60} style={{ verticalAlign: 'bottom' }} src="/static/logo-panel.png" /></Link>
+    </span>
 
     <Button color="primary">
       <Link className={classes.link} href="/petitions" style={{ color: 'white' }}>Petice</Link>
