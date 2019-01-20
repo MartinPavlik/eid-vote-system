@@ -159,7 +159,8 @@ const resolvers = {
       if (!user) {
         return false;
       }
-      const maybeVote = await PetitionVotesModel.findOne({ userId: user._id }).exec();
+      const maybeVote = await PetitionVotesModel
+        .findOne({ userId: user._id, petitionId: petition._id }).exec();
       return Boolean(maybeVote);
     }),
     owner: (petition) =>
