@@ -7,6 +7,8 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
 import withTransformProps from 'lib/withTransformProps';
+import withCurrentUserId from 'Auth/withCurrentUserId';
+import Link from 'components/Link';
 import { parseIsoDateToString } from './utils';
 import SexChart from './components/SexChart';
 import AgeChart from './components/AgeChart';
@@ -63,6 +65,48 @@ class DetailPage extends Component {
   }
 
   handleSign = () => {
+    const { petition: { _id }, onVote } = this.props;
+    onVote(_id);
+  }
+
+  renderVoteButton = () => {
+    const { currentUserId, petition } = this.props;
+
+    const dateTo = new Date(petition.to);
+    const now = new Date();
+
+    const expired = now >= dateTo;
+    if (expired) {
+      return (
+        <Chip label="Hlasování jíž skončilo." color="secondary" />
+      );
+    }
+
+    if (!currentUserId) {
+      return (
+        <Typography>
+          Pokud chcete hlasovat, <Link href="/link">přihlašte se</Link>.
+        </Typography>
+      );
+    }
+
+    if (petition && petition.userHasAlreadyVoted) {
+      return (
+        <div>
+          <Chip label="Již podepsáno" color="primary" />
+        </div>
+      );
+    }
+
+    return (
+      <Button
+        onClick={this.handleSign}
+        variant="contained"
+        color="primary"
+      >
+        Podepsat
+      </Button>
+    );
   }
 
   render() {
@@ -71,10 +115,7 @@ class DetailPage extends Component {
     const from = parseIsoDateToString(petition.from);
     const to = parseIsoDateToString(petition.to);
 
-    const dateTo = new Date(petition.to);
-    const now = new Date();
 
-    const canCongirm = now < dateTo;
     const chartData = this.parseVotes([]);
 
     console.log(this.props);
@@ -101,20 +142,9 @@ class DetailPage extends Component {
         </div>
 
 
-        {canCongirm && (
-          <div className={classes.row}>
-            <Button onClick={this.handleSign} variant="contained" color="primary">
-              Podepsat
-            </Button>
-          </div>
-        )}
-
-        {!canCongirm && (
-          <div>
-            <Chip label="Již podepsáno" color="primary" />
-          </div>
-
-        )}
+        <div className={classes.row}>
+          {this.renderVoteButton()}
+        </div>
 
         <Typography component="h2" variant="display1" gutterBottom>
           Průběžné výsledky
@@ -161,17 +191,32 @@ DetailPage.defaultProps = {
   },
 };
 
+const PetitionFragment = gql`
+  fragment PetitionFragment on Petition {
+    _id
+    title
+    description
+    from
+    to
+  }
+`;
 
 const PetitionByIdQuery = gql`
   query Petitions($id: ID!) {
     petitions(_id: $id) {
-      _id
-      title
-      description
-      from
-      to
+      ...PetitionFragment
     }
   }
+  ${PetitionFragment}
+`;
+
+const VoteMutation = gql`
+  mutation vote($petitionId: ID!) {
+    vote(petitionId: $petitionId) {
+      ...PetitionFragment
+    }
+  }
+  ${PetitionFragment}
 `;
 
 const withPetitions = graphql(PetitionByIdQuery, {
@@ -182,8 +227,16 @@ const withPetitions = graphql(PetitionByIdQuery, {
   }),
 });
 
+const withVote = graphql(VoteMutation, {
+  options: (({ mutate }) => ({
+    onVote: (petitionId) => mutate({ variables: { petitionId } }),
+  })),
+});
+
 export default pipe(
   withStyles(styles),
+  withVote,
+  withCurrentUserId,
   withTransformProps(ownProps => ({
     ...ownProps,
     petition: pipe(
