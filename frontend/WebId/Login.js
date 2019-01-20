@@ -95,7 +95,7 @@ class Login extends Component {
       );
     }
     return (
-      <div>
+      <div style={{ textAlign: 'center' }}>
         {isLoading ?
           <Typography component="p">
             Loading...
