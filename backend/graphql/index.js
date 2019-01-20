@@ -21,7 +21,7 @@ const typeDefs = `
     description: String!
     to: String!
     from: String!
-    hasUserAlreadyVoted: Boolean!
+    userHasAlreadyVoted: Boolean!
     owner: User!
     ownerId: ID!
     votes: [PetitionVote]
@@ -145,7 +145,10 @@ const resolvers = {
 
   Petition: {
     // TODO
-    hasUserAlreadyVoted: () => false,
+    userHasAlreadyVoted: withAuth(false)(async (petition, _, { user }) => {
+      const maybeVote = await PetitionVotesModel.findOne({ userId: user._id }).exec();
+      return Boolean(maybeVote);
+    }),
     owner: (petition) =>
       UserModel.findById(petition.ownerId),
     votes: (petition) =>

@@ -199,6 +199,7 @@ const PetitionFragment = gql`
     description
     from
     to
+    userHasAlreadyVoted
     votes {
       _id
       petitionId
