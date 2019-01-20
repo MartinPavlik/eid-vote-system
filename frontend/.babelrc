@@ -23,7 +23,7 @@
       ]
     },
     "test": {
-      "presets": [["next/babel", { "preset-env": { "modules": "commonjs" } }]],
+      "presets": [["next/babel", "es2015", { "preset-env": { "modules": "commonjs" } }]],
       "plugins": [
         "transform-flow-strip-types",
         ["module-resolver", {

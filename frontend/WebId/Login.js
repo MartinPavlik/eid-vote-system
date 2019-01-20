@@ -20,15 +20,22 @@ class Login extends Component {
     }
   }
 
-  handleLogin = async () => {
+  handleSign = () => {
+    this.WebID.sign((err, loginData) => {
+      console.log(err);
+      console.log(loginData);
+    });
+  }
+
+  handleLogin = () => {
     const { onLogin } = this.props;
     this.setState({ error: null, isLoading: true });
-    try {
-      const loginData = await this.WebID.login();
-      console.log('login data', loginData);
-    } catch (err) {
+
+    this.WebID.login((err, loginData) => {
       console.log(err);
-    }
+      console.log(loginData);
+    });
+
     /*
       if (error) {
         this.setState({
@@ -91,7 +98,9 @@ class Login extends Component {
           :
           <Button onClick={this.handleLogin}>Login</Button>
         }
+        <Button onClick={this.handleSign}>Sign</Button>
       </div>
+
     );
   }
 }

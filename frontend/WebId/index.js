@@ -9,7 +9,8 @@ const REQUEST_TYPE = {
 
 class WebID {
 
-  constructor(webSocketUrl = 'ws://192.168.51.154:8080/websocket/msg') {
+  constructor(webSocketUrl = 'ws://192.168.51.154:6969/websocket/msg') {
+
     this.webSocketUrl = webSocketUrl;
     this.webSocket = new WebSocket(webSocketUrl);
     this.setListeners();
@@ -30,7 +31,6 @@ class WebID {
   setListeners() {
     this.webSocket.onmessage = (event) => {
       const data = this.parseEventData(event);
-      console.log(data);
       if (event.cmd === REQUEST_TYPE.CARD_PRESENT_STATUS) {
         this.isCardPresent.callback !== null && this.isCardPresent.callback(event.msg); // eslint-disable-line
       } else {
@@ -44,24 +44,24 @@ class WebID {
     };
   }
 
-  async sign() {
+  sign(cb) {
     // todo on java library
-    return this.login();
+    return this.login(cb);
   }
 
-  async login() {
-    try {
-      const handshakeDataResponse = this.sendRequest(REQUEST_TYPE.HANDSHAKE, null);
+  login(cb) {
+    this.sendRequest(REQUEST_TYPE.HANDSHAKE, null).then((handshakeDataResponse) => {
       console.log(handshakeDataResponse);
       const signData = handshakeDataResponse.message;
       const signSignature = handshakeDataResponse.signature;
       const signCertificate = handshakeDataResponse.message.shortCert;
-      return Promise.resolve({ signData, signSignature, signCertificate });
-    } catch (err) {
-      return Promise.reject(err);
-    }
+      cb(null, { signData, signSignature, signCertificate });
+    }).catch((err) => {
+      cb(err, null);
+    });
   }
 
+  /*
   async register() {
     try {
       // todo verification long certificate
@@ -81,7 +81,7 @@ class WebID {
       return Promise.reject(err);
     }
   }
-
+*/
   getResponse(command, message, signature) {
     this.activeRequest = false;
     const { cmd, resolve, reject } = this.request;
@@ -93,11 +93,11 @@ class WebID {
   }
 
   sendRequest(cmd, msg) {
-    if (this.activeRequest) {
-      return Promise.reject(new Error('Other pending request...'));
-    }
-    this.activeRequest = true;
     return new Promise((resolve, reject) => {
+      if (this.activeRequest) {
+        reject(new Error('Other pending request...'));
+      }
+      this.activeRequest = true;
       this.request = { cmd, resolve, reject };
       this.webSocket.send(JSON.stringify({ cmd, msg }));
       this.setTimeout(resolve, reject, 1000);
