@@ -42,6 +42,16 @@ const Layout = ({
           width: 70%;
           margin: 0 auto;
         }
+
+        @media screen and (max-width: 992px) {
+          .content {
+            width: 100%;
+          }
+  
+          .appbar {
+            width: 100%;
+          }
+        }
       `
     }
     </style>
