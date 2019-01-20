@@ -101,11 +101,24 @@ class Login extends Component {
             Loading...
           </Typography>
           :
-          <Button
-            onClick={this.handleLogin}
-            disabled={!this.state.isCardPresent || !this.state.isReaderPresent}
-          >Login
-          </Button>
+          <div>
+              {!this.state.isReaderPresent &&
+                <Typography variant="display1">
+                  Prosím, vložte čtečku karet
+                </Typography>
+              }
+              {!this.state.isCardPresent &&
+                <Typography variant="display1">                  Prosím, vložte kartu
+                </Typography>
+              }
+            <Button
+              style={{ marginTop: '2rem' }}
+              onClick={this.handleLogin}
+              disabled={!this.state.isCardPresent || !this.state.isReaderPresent}
+            >
+            Login
+            </Button>
+          </div>
         }
         {/*
         <Button
