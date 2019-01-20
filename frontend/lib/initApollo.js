@@ -3,11 +3,8 @@ import { from } from 'apollo-link';
 import { SubscriptionClient } from 'subscriptions-transport-ws';
 import { WebSocketLink } from 'apollo-link-ws';
 import { GRAPHQL_URL_WS } from 'appConfig';
-// import { getToken } from 'Auth';
+import { getToken } from 'Auth';
 import ws from 'ws';
-
-// TODO
-const getToken = () => '';
 
 let apolloClient = null;
 

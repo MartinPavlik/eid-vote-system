@@ -3,8 +3,9 @@ import * as jwt from '../components/jwt';
 import UserModel from '../models/user';
 import PetitionModel from '../models/petition';
 import PetitionVotesModel from '../models/petitionVote';
+import withAuth from './withAuth';
 
-const secp256k1 = require('secp256k1');
+// const secp256k1 = require('secp256k1');
 
 const typeDefs = `
   type User {
@@ -70,24 +71,28 @@ const resolvers = {
   },
 
   Mutation: {
-    vote: async (_, { petitionId, comment }) => {
-      const userId = '5c43962cf7f529208f74cb40'; // todo
-      const vote = { petitionId, userId, comment };
+    vote: withAuth(async (_, { petitionId, comment }, { user }) => {
+
+      // todo select birthDate and sex, and validate if user already vote
+      const selectedUser = await UserModel.findById(user._id);
+
+      const userId = user._id;
+      const age = Math.round((Math.rand() * 100));
+      const sex = 'M';
+
+      const vote = {
+        petitionId, userId, comment, age, sex,
+      };
       const petitionVote = new PetitionVotesModel({ ...vote });
       await petitionVote.save();
       return PetitionModel.findById(petitionId);
-    },
-    createPetition: async (_, { input }) => {
-      // TODO - inject owner id
-      console.log('input: ', input); // eslint-disable-line
-      const petition = new PetitionModel(input);
-
+    }),
+    createPetition: withAuth(async (_, { input }, { user }) => {
+      const petition = new PetitionModel({ ...input, ownerId: user._id });
       console.log('petition: ', petition); // eslint-disable-line
       const newPetition = await petition.save();
-      console.log('newPetition: ', newPetition); // eslint-disable-line
-
       return PetitionModel.findById(newPetition._id);
-    },
+    }),
     login: async (_, { input }) => {
       // TODO
       const {
@@ -105,7 +110,6 @@ const resolvers = {
       console.log('documentNumber', documentNumber);
       console.log('signature', signature);
 
-
       const messageAsString = JSON.stringify(message);
 
       console.log('message as string', messageAsString);
@@ -114,9 +118,8 @@ const resolvers = {
 
       console.log('message as buffer', messageAsBuffer);
 
-
       // TODO - verify
-      console.log(secp256k1.verify(messageAsBuffer, signature, publicKey));
+      // console.log(secp256k1.verify(messageAsBuffer, signature, publicKey));
 
 
       console.log('DONE');
