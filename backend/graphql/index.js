@@ -4,6 +4,7 @@ import UserModel from '../models/user';
 import PetitionModel from '../models/petition';
 import PetitionVotesModel from '../models/petitionVote';
 import withAuth from './withAuth';
+import verifyCert from './verify';
 
 // const secp256k1 = require('secp256k1');
 
@@ -115,6 +116,15 @@ const resolvers = {
       console.log('certificate', certificate);
       console.log('documentNumber', documentNumber);
       console.log('signature', signature);
+
+      try {
+        if (!verifyCert(certificate)) {
+          throw new Error('Certificate not valid');
+        }
+      } catch (e) {
+        console.log('Error while validating certificate: ', e);
+      }
+
 
       const messageAsString = JSON.stringify(message);
 

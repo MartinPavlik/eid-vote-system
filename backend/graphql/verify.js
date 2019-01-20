@@ -7,6 +7,7 @@ const issuer = 'issuer.crt';
 
 const testedName = v4();
 
+/*
 const base64str = `-----BEGIN CERTIFICATE-----
 MIICOTCCAZygAwIBAgIJAYEH4wMVNaerMAoGCCqGSM49BAMEMFUxEjAQBgNVBAMM
 CWVJRFN1YkNDQTEyMDAGA1UECgwpU1TDgVROw40gVElTS8OBUk5BIENFTklOLCBz
@@ -20,30 +21,40 @@ AgCAMB8GA1UdIwQYMBaAFBGZ8vJ+DuZuzlMSObhehXfLtQh0MAoGCCqGSM49BAME
 A4GKADCBhgJBDaZw5RuzH59rK9+QWuKT0KIrAVztN/EySi0DyXly4getutYQ34vR
 BI9yml3WUOY7/ZJ6fnzMPcANcfNnqOGolskCQXdMlVO/XFWzd0XGmQACJtq1OpP1
 qoPkS6xRToawFryV8kstluPtbXZcT4JzCFQyQ8OXj5uWJQqRBvrTeERx+lDc
------END CERTIFICATE-----`;
+-----END CERTIFICATE-----`; */
 
-const fileToWrite = Buffer.from(base64str, 'utf-8');
+export const verifyCertificate = base64str =>
+  new Promise((resolve, reject) => {
+    const fileToWrite = Buffer.from(base64str, 'utf-8');
 
-fs.writeFile(`${certDir}${testedName}.crt`, fileToWrite, 'base64', (err) => {
-  if (err === null) {
-    const child = spawn('java', ['-jar', 'certificateverifier-1.0-jar-with-dependencies.jar', `${certDir}${issuer}`, `${certDir}${testedName}.crt`]);
+    fs.writeFile(`${certDir}${testedName}.crt`, fileToWrite, 'base64', (err) => {
+      if (err === null) {
+        const child = spawn('java', ['-jar', 'certificateverifier-1.0-jar-with-dependencies.jar', `${certDir}${issuer}`, `${certDir}${testedName}.crt`]);
 
-    child.stdout.on('data', (data) => {
-      if (`${data}` === 'true') {
-        console.log('overeno');
+        child.stdout.on('data', (data) => {
+          if (`${data}` === 'true') {
+            console.log('overeno');
+            resolve(true);
+          }
+          resolve(false);
+        });
+
+        child.stderr.on('data', (data) => {
+          console.log(`stderr: ${data}`);
+          reject(new Error('Java client sucks'));
+        });
+
+        child.on('close', (code) => {
+          spawn('rm', [`${certDir}${testedName}.crt`]);
+          console.log(`child process exited with code ${code}`);
+        });
+      } else {
+        console.log(err);
+        reject(new Error('Can not write file'));
       }
     });
 
-    child.stderr.on('data', (data) => {
-      console.log(`stderr: ${data}`);
-    });
+  });
 
-    child.on('close', (code) => {
-      spawn('rm', [`${certDir}${testedName}.crt`]);
-      console.log(`child process exited with code ${code}`);
-    });
-  } else {
-    console.log(err);
-  }
-});
 
+export default verifyCertificate;
