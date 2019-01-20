@@ -1,10 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import { pipe } from 'ramda';
+import { pipe, sortBy, reverse, take } from 'ramda';
 import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
 import PetitionTable from '../Petition/components/PetitionTable';
+
 
 const styles = () => ({
   intro: {
@@ -38,7 +39,14 @@ class Home extends Component {
         </Typography>
 
         <PetitionTable
-          rows={petitions || []}
+          rows={
+            pipe(
+              sortBy(((item) => item.votes.length)),
+              reverse,
+              take(5),
+            )(petitions)
+            || []
+          }
         />
 
       </Fragment>
@@ -54,6 +62,9 @@ const PetitionsQuery = gql`
       description
       from
       to
+      votes {
+        _id
+      }
     }
   }
 `;

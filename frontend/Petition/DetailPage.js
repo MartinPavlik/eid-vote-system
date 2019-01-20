@@ -152,7 +152,7 @@ class DetailPage extends Component {
 
         <div className={classes.row}>
           <div className={classes.voteHeader}>
-            Hlasovalo celkem
+            Podepsalo celkem
           </div>
           <div>
             {petition.votes.length}
@@ -161,7 +161,7 @@ class DetailPage extends Component {
 
         <div className={classes.row}>
           <div className={classes.voteHeader}>
-            Věk hlasujících
+            Věk
           </div>
           <AgeChart
             data={chartData.ages}
@@ -170,7 +170,7 @@ class DetailPage extends Component {
 
         <div className={classes.row}>
           <div className={classes.voteHeader}>
-            Pohlaví hlasujících
+            Pohlaví
           </div>
           <SexChart
             data={chartData.sex}
