@@ -9,7 +9,7 @@ const styles = theme => {
     base: {
       display: 'flex',
       flex: 1,
-      background: theme.palette.appBar.main,
+      // background: theme.palette.appBar.main,
       padding: `${theme.spacing.unit}px ${theme.spacing.unit * 4}px`,
       alignItems: 'center',
       justifyContent: 'flex-end',
