@@ -85,7 +85,7 @@ class DetailPage extends Component {
     if (!currentUserId) {
       return (
         <Typography>
-          Pokud chcete hlasovat, <Link href="/link">přihlašte se</Link>.
+          Pokud chcete hlasovat, <Link href="/login">přihlašte se</Link>.
         </Typography>
       );
     }
