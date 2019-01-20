@@ -86,10 +86,8 @@ const resolvers = {
 
       const userId = selectedUser._id;
       const age = Math.round((Math.random() * 100));
-      const sex = 'M';
-
       const vote = {
-        petitionId, userId, comment, age, sex,
+        petitionId, userId, comment, age,
       };
       const petitionVote = new PetitionVotesModel({ ...vote });
       await petitionVote.save();
@@ -143,7 +141,10 @@ const resolvers = {
       let user = await UserModel.findOne({ documentNumber }).exec();
 
       if (!user) {
-        const newUser = new UserModel({ documentNumber });
+        // TODO
+        const sex = 'M';
+
+        const newUser = new UserModel({ documentNumber, certificate, sex });
         const newUserDoc = await newUser.save();
         user = await UserModel.findById(newUserDoc._id).exec();
       }
