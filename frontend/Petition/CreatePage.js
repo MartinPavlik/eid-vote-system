@@ -158,7 +158,6 @@ class CreatePetitionForm extends Component {
       );
     }
 
-
     return (
       <Fragment>
 
