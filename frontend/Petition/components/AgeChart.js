@@ -31,7 +31,7 @@ class AgeChart extends Component {
               yAxes: [{
                 scaleLabel: {
                   display: true,
-                  labelString: 'Hlasů',
+                  labelString: 'Podpisů',
                 },
                 ticks: {
                   min: 0,

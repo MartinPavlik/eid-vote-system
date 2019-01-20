@@ -14,11 +14,6 @@ const styles = () => ({
 });
 
 class ListPage extends Component {
-  handleClickRow = (id) => {
-    console.log(id);
-  }
-
-
   render() {
     const { classes, data: { petitions } } = this.props;
 
@@ -30,7 +25,6 @@ class ListPage extends Component {
         </Typography>
         <div className={classes.row}>
           <PetitionTable
-            onRowClick={this.handleClickRow}
             rows={petitions || []}
           />
         </div>
@@ -48,6 +42,9 @@ const PetitionsQuery = gql`
       description
       from
       to
+      votes {
+        _id
+      }
     }
   }
 `;
