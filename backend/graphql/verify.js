@@ -2,30 +2,30 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const { v4 } = require('uuid');
 
-const certDir = './';
+const certDir = `${__dirname}/`;
 const issuer = 'issuer.crt';
 
-const testedName = v4();
+function chunkSubstr(str, size) {
+  const numChunks = Math.ceil(str.length / size);
+  const chunks = new Array(numChunks);
 
-/*
-const base64str = `-----BEGIN CERTIFICATE-----
-MIICOTCCAZygAwIBAgIJAYEH4wMVNaerMAoGCCqGSM49BAMEMFUxEjAQBgNVBAMM
-CWVJRFN1YkNDQTEyMDAGA1UECgwpU1TDgVROw40gVElTS8OBUk5BIENFTklOLCBz
-dMOhdG7DrSBwb2RuaWsxCzAJBgNVBAYTAkNaMB4XDTE5MDEwMjAwMDAwMFoXDTI5
-MDEwMjIzNTk1OVowNDELMAkGA1UEBhMCQ1oxETAPBgNVBAoMCENEQlBfZUlEMRIw
-EAYDVQQDDAkyMTA0NjI3NTUwgZswEAYHKoZIzj0CAQYFK4EEACMDgYYABADb54ar
-WzzoNHieYYJC2K593h91MxaBsv0dk6ey+3OT3PV1pHZ2MQrdGqjk+NAoWp+QAjf/
-VyQDMtgO9FQPh6/ddgFxKQpbHQ9mQIzx9xMgY6AaZggx8T+Ovqz28mbqexGS8Qh7
-GpRfzkVx2PdaFOvXrfiQqnycyy+c/yduZ8hRSzz0n6MzMDEwDgYDVR0PAQH/BAQD
-AgCAMB8GA1UdIwQYMBaAFBGZ8vJ+DuZuzlMSObhehXfLtQh0MAoGCCqGSM49BAME
-A4GKADCBhgJBDaZw5RuzH59rK9+QWuKT0KIrAVztN/EySi0DyXly4getutYQ34vR
-BI9yml3WUOY7/ZJ6fnzMPcANcfNnqOGolskCQXdMlVO/XFWzd0XGmQACJtq1OpP1
-qoPkS6xRToawFryV8kstluPtbXZcT4JzCFQyQ8OXj5uWJQqRBvrTeERx+lDc
------END CERTIFICATE-----`; */
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size);
+  }
+
+  return chunks;
+}
+
 
 export const verifyCertificate = base64str =>
   new Promise((resolve, reject) => {
-    const fileToWrite = Buffer.from(base64str, 'utf-8');
+    // const formatted = base64str.split(64).join('\n');
+
+    const splitted = chunkSubstr(base64str, 64).join('\n');
+
+    const fileToWrite = Buffer.from(`-----BEGIN CERTIFICATE-----\n${splitted}\n-----END CERTIFICATE-----`, 'utf-8');
+
+    const testedName = v4();
 
     fs.writeFile(`${certDir}${testedName}.crt`, fileToWrite, 'base64', (err) => {
       console.log(`file created... ${certDir}${testedName}.crt`, err); // eslint-disable-line
@@ -45,12 +45,10 @@ export const verifyCertificate = base64str =>
           reject(new Error(data));
         });
 
-        /*
         child.on('close', (code) => {
           spawn('rm', [`${certDir}${testedName}.crt`]);
           console.log(`child process exited with code ${code}`);
         });
-        */
       } else {
         console.log(err);
         reject(new Error('Can not write file'));

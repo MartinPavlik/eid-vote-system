@@ -39,9 +39,9 @@ class Login extends Component {
       console.log(err, loginData);
       const message = {
         documentNumber: loginData.signData.documentNumber,
-        // certificate: loginData.signData.shortCertBase64,
+        certificate: loginData.signData.shortCertBase64,
         // certificate: loginData.signData.publicKeyBase64,
-        certificate: '5938374',
+        // certificate: '5938374',
         publicKey: loginData.signData.publicKeyBase64,
       };
       onLogin({
