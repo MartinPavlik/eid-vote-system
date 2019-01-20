@@ -19,6 +19,9 @@ const userSchema = new Schema({
   sex: {
     type: String,
   },
+  certificate: {
+    type: String,
+  },
 }, {
   collection: 'user',
   timestamps: true,
