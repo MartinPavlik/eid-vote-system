@@ -9,6 +9,7 @@ import { withStyles } from '@material-ui/core/styles';
 import withTransformProps from 'lib/withTransformProps';
 import withCurrentUserId from 'Auth/withCurrentUserId';
 import Link from 'components/Link';
+import moment from 'moment';
 import { parseIsoDateToString } from './utils';
 import SexChart from './components/SexChart';
 import AgeChart from './components/AgeChart';
@@ -72,10 +73,10 @@ class DetailPage extends Component {
   renderVoteButton = () => {
     const { currentUserId, petition } = this.props;
 
-    const dateTo = new Date(petition.to);
-    const now = new Date();
+    // const dateTo = new Date(petition.to);
+    // const now = new Date();
 
-    const expired = now >= dateTo;
+    const expired = moment() >= moment(petition.to);
     if (expired) {
       return (
         <Chip label="Hlasování jíž skončilo." color="secondary" />
