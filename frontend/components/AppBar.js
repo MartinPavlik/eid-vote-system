@@ -20,6 +20,7 @@ const styles = theme => {
     },
     link: {
       textDecoration: 'none',
+      color: 'white',
     },
   };
 };
@@ -28,22 +29,28 @@ const AppBar = ({ classes, currentUserId }): React.Node => (
   <div className={classes.base}>
 
     <span>
-      <Link className={classes.link} href="/" style={{ color: 'white' }}><img height={60} style={{ verticalAlign: 'bottom' }} src="/static/logo-panel.png" /></Link>
+      <Link className={classes.link} href="/"><img height={60} style={{ verticalAlign: 'bottom' }} src="/static/logo-panel.png" /></Link>
     </span>
 
     <Button color="primary">
-      <Link className={classes.link} href="/petitions" style={{ color: 'white' }}>Petice</Link>
+      <Link className={classes.link} href="/petitions">Petice</Link>
     </Button>
 
     {currentUserId &&
       <Button color="primary">
-        <Link className={classes.link} href="/create-petition" style={{ color: 'white' }}>Vytvořit petici</Link>
+        <Link className={classes.link} href="/create-petition">Vytvořit petici</Link>
       </Button>
     }
 
     {!currentUserId &&
       <Button color="primary" style={{ marginLeft: 'auto' }}>
-        <Link className={classes.link} href="/login" style={{ color: 'white' }}>Login</Link>
+        <Link className={classes.link} href="/login">Přihlásit se</Link>
+      </Button>
+    }
+
+    {currentUserId &&
+      <Button color="primary" style={{ marginLeft: 'auto' }}>
+        <Link className={classes.link} href="/logout">Odhlásit se</Link>
       </Button>
     }
 
