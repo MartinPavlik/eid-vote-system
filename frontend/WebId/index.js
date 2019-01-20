@@ -3,21 +3,24 @@ import * as ecCrypto from 'eccrypto';
 const REQUEST_TYPE = {
   HANDSHAKE: 'handshake',
   CARD_PRESENT_STATUS: 'cardPresentStatus',
+  READER_PRESENT_STATUS: 'readerPresentStatus',
   VIEW_AVAILABLE_DATA: 'viewAvailableData',
   DATA: 'data',
 };
 
 class WebID {
 
-  constructor(webSocketUrl = 'ws://192.168.51.154:6969/websocket/msg') {
+  constructor(webSocketUrl = 'ws://192.168.51.19:6969/websocket/msg') {
 
     this.webSocketUrl = webSocketUrl;
     this.webSocket = new WebSocket(webSocketUrl);
     this.setListeners();
     this.activeRequest = false;
-    this.request = { cmd: null, resolve: null, reject: null };
+    this.requests = { cmd: null, resolve: null, reject: null };
     this.isCardPresent = { callback: null };
-
+    this.isReaderPresent = { callback: null };
+    this.isCardPresentBoolean = false;
+    this.isReaderPresentBoolean = false;
   }
 
   parseEventData(event) {
@@ -28,19 +31,25 @@ class WebID {
     this.isCardPresent.callback = cb;
   }
 
+  isReaderPresentListener(cb) {
+    this.isReaderPresent.callback = cb;
+  }
+
   setListeners() {
     this.webSocket.onmessage = (event) => {
       const data = this.parseEventData(event);
-      if (event.cmd === REQUEST_TYPE.CARD_PRESENT_STATUS) {
-        this.isCardPresent.callback !== null && this.isCardPresent.callback(event.msg); // eslint-disable-line
+      if (data.cmd === REQUEST_TYPE.CARD_PRESENT_STATUS) {
+        this.isCardPresent.callback !== null && this.isCardPresent.callback(data.msg); // eslint-disable-line
+      } else if (data.cmd === REQUEST_TYPE.READER_PRESENT_STATUS) {
+          this.isReaderPresent.callback !== null && this.isReaderPresent.callback(data.msg); // eslint-disable-line
       } else {
         this.getResponse(data.cmd, data.msg, data.signature);
       }
-    };
-    this.webSocket.onclose = () => {
-      setTimeout(() => {
-        this.webSocket = new WebSocket(this.webSocketUrl);
-      }, 5000);
+      this.webSocket.onclose = () => {
+        setTimeout(() => {
+          this.webSocket = new WebSocket(this.webSocketUrl);
+        }, 5000);
+      };
     };
   }
 
@@ -51,11 +60,10 @@ class WebID {
 
   login(cb) {
     this.sendRequest(REQUEST_TYPE.HANDSHAKE, null).then((handshakeDataResponse) => {
-      console.log(handshakeDataResponse);
       const signData = handshakeDataResponse.message;
-      const signSignature = handshakeDataResponse.signature;
-      const signCertificate = handshakeDataResponse.message.shortCert;
-      cb(null, { signData, signSignature, signCertificate });
+      const { signature } = handshakeDataResponse;
+      const signCertificate = handshakeDataResponse.message.shortCertBase64;
+      cb(null, { signData, signature, signCertificate });
     }).catch((err) => {
       cb(err, null);
     });
@@ -92,15 +100,17 @@ class WebID {
     }
   }
 
-  sendRequest(cmd, msg) {
+  sendRequest(cmd, msg, activeRequest = true) {
     return new Promise((resolve, reject) => {
       if (this.activeRequest) {
         reject(new Error('Other pending request...'));
       }
-      this.activeRequest = true;
+      if (activeRequest) {
+        this.activeRequest = true;
+      }
       this.request = { cmd, resolve, reject };
       this.webSocket.send(JSON.stringify({ cmd, msg }));
-      this.setTimeout(resolve, reject, 1000);
+      this.setTimeout(resolve, reject, 60000);
     });
   }
 

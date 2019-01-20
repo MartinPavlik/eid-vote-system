@@ -3,19 +3,21 @@ import * as ecCrypto from 'eccrypto';
 const REQUEST_TYPE = {
   HANDSHAKE: 'handshake',
   CARD_PRESENT_STATUS: 'cardPresentStatus',
+  READER_PRESENT_STATUS: 'readerPresentStatus',
   VIEW_AVAILABLE_DATA: 'viewAvailableData',
   DATA: 'data',
 };
 
 class WebID {
 
-  constructor(webSocketUrl = 'ws://192.168.51.154:8080/websocket/msg') {
+  constructor(webSocketUrl = 'ws://192.168.51.154:6969/websocket/msg') {
     this.webSocketUrl = webSocketUrl;
     this.webSocket = new WebSocket(webSocketUrl);
     this.setListeners();
     this.activeRequest = false;
     this.request = { cmd: null, resolve: null, reject: null };
     this.isCardPresent = { callback: null };
+    this.isReaderPresent = { callback: null };
 
   }
 
@@ -27,12 +29,17 @@ class WebID {
     this.isCardPresent.callback = cb;
   }
 
+  isReaderPresentListener(cb) {
+    this.isReaderPresent.callback = cb;
+  }
+
   setListeners() {
     this.webSocket.onmessage = (event) => {
       const data = this.parseEventData(event);
-      console.log(data);
       if (event.cmd === REQUEST_TYPE.CARD_PRESENT_STATUS) {
         this.isCardPresent.callback !== null && this.isCardPresent.callback(event.msg); // eslint-disable-line
+      } else if (event.cmd === REQUEST_TYPE.READER_PRESENT_STATUS) {
+        this.isReaderPresent.callback !== null && this.isReaderPresent.callback(event.msg); // eslint-disable-line
       } else {
         this.getResponse(data.cmd, data.msg, data.signature);
       }
@@ -53,10 +60,13 @@ class WebID {
     try {
       const handshakeDataResponse = await this.sendRequest(REQUEST_TYPE.HANDSHAKE, null);
       console.log(handshakeDataResponse);
+      /*
       const signData = handshakeDataResponse.message;
       const signSignature = handshakeDataResponse.signature;
       const signCertificate = handshakeDataResponse.message.shortCert;
       return Promise.resolve({ signData, signSignature, signCertificate });
+      */
+     return Promise.resolve();
     } catch (err) {
       return Promise.reject(err);
     }
@@ -70,7 +80,6 @@ class WebID {
       const loginSignature = handshakeDataResponse.signature;
       const loginCertificate = handshakeDataResponse.message.shortCert;
       const availableDataResponse = await this.sendRequest(REQUEST_TYPE.VIEW_AVAILABLE_DATA, null);
-      console.log(availableDataResponse);
       const availableData = availableDataResponse.message;
       const receivedDataResponse = await this.sendRequest(REQUEST_TYPE.DATA, availableData);
       const receivedData = receivedDataResponse.message;
@@ -83,6 +92,10 @@ class WebID {
   }
 
   getResponse(command, message, signature) {
+    console.log('command', command);
+    console.log('message', message);
+    console.log('signature', signature);
+
     this.activeRequest = false;
     const { cmd, resolve, reject } = this.request;
     if (cmd === command) {

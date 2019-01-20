@@ -11,6 +11,8 @@ class Login extends Component {
   state = {
     isLoading: false,
     error: null,
+    isCardPresent: false,
+    isReaderPresent: false,
   }
 
   componentDidMount() {
@@ -33,7 +35,25 @@ class Login extends Component {
 
     this.WebID.login((err, loginData) => {
       console.log(err);
-      console.log(loginData);
+      const message = {
+        documentNumber: loginData.signData.documentNumber,
+        certificate: loginData.signCertificate,
+        publicKey: loginData.signData.publicKeyBase64,
+      };
+      onLogin({
+        message,
+        signature: loginData.signature,
+      }).then(token => {
+        console.log('token::', token);
+        setToken(token);
+        redirect('/');
+      }).catch(e => {
+        console.log('Error: ', e);
+        this.setState({
+          error: 'Can not log in',
+          isLoading: false,
+        });
+      });
     });
 
     /*
@@ -48,35 +68,16 @@ class Login extends Component {
 
       const { documentNumber, shortCert, publicKey } = message;
       */
-
-    const fakeMessage = {
-      documentNumber: 'fake doc num',
-      certificate: 'fake cert',
-      publicKey: 'fake pub key',
-    };
-
-    const fakeSignature = 'fake sign';
-
-    onLogin({
-      message: fakeMessage,
-      signature: fakeSignature,
-    }).then(token => {
-      console.log('token::', token);
-      setToken(token);
-      redirect('/');
-    }).catch(e => {
-      console.log('Error: ', e);
-      this.setState({
-        error: 'Can not log in',
-        isLoading: false,
-      });
-    });
   }
 
   handleListenToStatusChange = () => {
     this.WebID.isCardPresentListener((status) => {
+      this.setState({ isCardPresent: status });
       // todo
-      console.log(`card present: ${status} `);
+    });
+    this.WebID.isReaderPresentListener((status) => {
+      this.setState({ isReaderPresent: status });
+      // todo
     });
   }
 
@@ -96,9 +97,17 @@ class Login extends Component {
             Loading...
           </Typography>
           :
-          <Button onClick={this.handleLogin}>Login</Button>
+          <Button
+            onClick={this.handleLogin}
+            disabled={!this.state.isCardPresent || !this.state.isReaderPresent}
+          >Login
+          </Button>
         }
-        <Button onClick={this.handleSign}>Sign</Button>
+        <Button
+          onClick={this.handleSign}
+          disabled={!this.state.isCardPresent || !this.state.isReaderPresent}
+        >Sign
+        </Button>
       </div>
 
     );
