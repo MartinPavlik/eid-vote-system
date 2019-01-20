@@ -4,6 +4,7 @@ import UserModel from '../models/user';
 import PetitionModel from '../models/petition';
 import PetitionVotesModel from '../models/petitionVote';
 import withAuth from './withAuth';
+import verifyCert from './verify';
 
 // const secp256k1 = require('secp256k1');
 
@@ -12,6 +13,7 @@ const typeDefs = `
     _id: ID!
     documentNumber: String!
     name: String
+    sex: String
   }
 
   type Petition {
@@ -20,7 +22,7 @@ const typeDefs = `
     description: String!
     to: String!
     from: String!
-    hasUserAlreadyVoted: Boolean!
+    userHasAlreadyVoted: Boolean!
     owner: User!
     ownerId: ID!
     votes: [PetitionVote]
@@ -29,6 +31,7 @@ const typeDefs = `
   type PetitionVote {
     _id: ID!
     petitionId: ID!
+    age: Int
     user: User!
     userId: ID!
     comment: String
@@ -82,7 +85,7 @@ const resolvers = {
       const selectedUser = await UserModel.findById(user._id);
 
       const userId = selectedUser._id;
-      const age = Math.round((Math.rand() * 100));
+      const age = Math.round((Math.random() * 100));
       const sex = 'M';
 
       const vote = {
@@ -114,6 +117,15 @@ const resolvers = {
       console.log('documentNumber', documentNumber);
       console.log('signature', signature);
 
+      try {
+        if (!verifyCert(certificate)) {
+          throw new Error('Certificate not valid');
+        }
+      } catch (e) {
+        console.log('Error while validating certificate: ', e);
+      }
+
+
       const messageAsString = JSON.stringify(message);
 
       console.log('message as string', messageAsString);
@@ -143,11 +155,18 @@ const resolvers = {
 
   Petition: {
     // TODO
-    hasUserAlreadyVoted: () => false,
+    userHasAlreadyVoted: withAuth(false)(async (petition, _, { user }) => {
+      if (!user) {
+        return false;
+      }
+      const maybeVote = await PetitionVotesModel
+        .findOne({ userId: user._id, petitionId: petition._id }).exec();
+      return Boolean(maybeVote);
+    }),
     owner: (petition) =>
       UserModel.findById(petition.ownerId),
     votes: (petition) =>
-      PetitionVotesModel.find({ petitionId: petition.id }).exec(),
+      PetitionVotesModel.find({ petitionId: petition._id }).exec(),
   },
 
   PetitionVote: {

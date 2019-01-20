@@ -13,7 +13,7 @@ import { parseIsoDateToString } from '../utils';
 
 const CustomTableCell = withStyles(theme => ({
   head: {
-    backgroundColor: theme.palette.common.black,
+    backgroundColor: '#2b3d51',
     color: theme.palette.common.white,
   },
   body: {
@@ -34,7 +34,7 @@ const styles = theme => ({
 
 class PetitionTable extends Component {
   render() {
-    const { classes, rows, onRowClick } = this.props;
+    const { classes, rows } = this.props;
 
     return (
       <Fragment>
@@ -44,6 +44,7 @@ class PetitionTable extends Component {
               <TableRow>
                 <CustomTableCell>Název</CustomTableCell>
                 <CustomTableCell align="right">Hlasování do</CustomTableCell>
+                <CustomTableCell align="right">Podpisů</CustomTableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -51,7 +52,6 @@ class PetitionTable extends Component {
                 <TableRow
                   key={row._id}
                   hover
-                  onClick={() => onRowClick(row._id)}
                 >
                   <TableCell align="right">
                     <Link href={`/petition/${row._id}`}>
@@ -59,6 +59,7 @@ class PetitionTable extends Component {
                     </Link>
                   </TableCell>
                   <TableCell align="right">{parseIsoDateToString(row.to)}</TableCell>
+                  <TableCell align="right">{row.votes.length}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

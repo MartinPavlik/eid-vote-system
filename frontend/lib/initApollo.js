@@ -12,9 +12,12 @@ export default function initApollo(cache, context) {
   const transportClient = new SubscriptionClient(
     GRAPHQL_URL_WS, {
       reconnect: process.browser,
-      connectionParams: () => ({
-        authToken: `Bearer ${getToken(context)}`,
-      }),
+      connectionParams: () => {
+        const token = getToken(context);
+        return {
+          authToken: token ? `Bearer ${token}` : '',
+        };
+      },
     },
     process.browser ? WebSocket : ws,
   );
