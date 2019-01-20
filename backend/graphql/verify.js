@@ -2,7 +2,7 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const { v4 } = require('uuid');
 
-const certDir = './../certifacates/';
+const certDir = './';
 const issuer = 'issuer.crt';
 
 const testedName = v4();
@@ -28,6 +28,7 @@ export const verifyCertificate = base64str =>
     const fileToWrite = Buffer.from(base64str, 'utf-8');
 
     fs.writeFile(`${certDir}${testedName}.crt`, fileToWrite, 'base64', (err) => {
+      console.log(`file created... ${certDir}${testedName}.crt`, err); // eslint-disable-line
       if (err === null) {
         const child = spawn('java', ['-jar', 'certificateverifier-1.0-jar-with-dependencies.jar', `${certDir}${issuer}`, `${certDir}${testedName}.crt`]);
 
@@ -41,13 +42,15 @@ export const verifyCertificate = base64str =>
 
         child.stderr.on('data', (data) => {
           console.log(`stderr: ${data}`);
-          reject(new Error('Java client sucks'));
+          reject(new Error(data));
         });
 
+        /*
         child.on('close', (code) => {
           spawn('rm', [`${certDir}${testedName}.crt`]);
           console.log(`child process exited with code ${code}`);
         });
+        */
       } else {
         console.log(err);
         reject(new Error('Can not write file'));

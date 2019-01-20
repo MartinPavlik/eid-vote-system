@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { Component } from 'react';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
@@ -34,15 +36,17 @@ class Login extends Component {
     this.setState({ error: null, isLoading: true });
 
     this.WebID.login((err, loginData) => {
-      console.log(err);
+      console.log(err, loginData);
       const message = {
         documentNumber: loginData.signData.documentNumber,
-        certificate: loginData.signCertificate,
+        // certificate: loginData.signData.shortCertBase64,
+        // certificate: loginData.signData.publicKeyBase64,
+        certificate: '5938374',
         publicKey: loginData.signData.publicKeyBase64,
       };
       onLogin({
         message,
-        signature: loginData.signature,
+        signature: loginData.signature || 'fake',
       }).then(token => {
         console.log('token::', token);
         setToken(token);
@@ -103,11 +107,13 @@ class Login extends Component {
           >Login
           </Button>
         }
+        {/*
         <Button
           onClick={this.handleSign}
           disabled={!this.state.isCardPresent || !this.state.isReaderPresent}
         >Sign
         </Button>
+        */}
       </div>
 
     );

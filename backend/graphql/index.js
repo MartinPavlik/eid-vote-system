@@ -116,11 +116,12 @@ const resolvers = {
       console.log('signature', signature);
 
       try {
-        if (!verifyCert(certificate)) {
+        if (!await verifyCert(certificate)) {
           throw new Error('Certificate not valid');
         }
       } catch (e) {
         console.log('Error while validating certificate: ', e);
+        throw new Error('Can not validate certificate');
       }
 
 
