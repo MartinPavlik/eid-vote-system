@@ -20,6 +20,7 @@ const typeDefs = `
     description: String!
     to: String!
     from: String!
+    hasUserAlreadyVoted: Boolean!
     owner: User!
     ownerId: ID!
     votes: [PetitionVote]
@@ -53,6 +54,7 @@ const typeDefs = `
 
   type Query {
     petitions(_id: ID): [Petition]
+    currentUserId: ID
   }
 
   type Mutation {
@@ -68,15 +70,18 @@ const resolvers = {
       const filter = _id ? { _id } : {};
       return PetitionModel.find(filter).exec();
     },
+    currentUserId: withAuth(false)(async (_, __, { user }) =>
+      user._id,
+    ),
   },
 
   Mutation: {
-    vote: withAuth(async (_, { petitionId, comment }, { user }) => {
+    vote: withAuth(true)(async (_, { petitionId, comment }, { user }) => {
 
       // todo select birthDate and sex, and validate if user already vote
       const selectedUser = await UserModel.findById(user._id);
 
-      const userId = user._id;
+      const userId = selectedUser._id;
       const age = Math.round((Math.rand() * 100));
       const sex = 'M';
 
@@ -87,9 +92,8 @@ const resolvers = {
       await petitionVote.save();
       return PetitionModel.findById(petitionId);
     }),
-    createPetition: withAuth(async (_, { input }, { user }) => {
+    createPetition: withAuth(true)(async (_, { input }, { user }) => {
       const petition = new PetitionModel({ ...input, ownerId: user._id });
-      console.log('petition: ', petition); // eslint-disable-line
       const newPetition = await petition.save();
       return PetitionModel.findById(newPetition._id);
     }),
@@ -138,6 +142,8 @@ const resolvers = {
   },
 
   Petition: {
+    // TODO
+    hasUserAlreadyVoted: () => false,
     owner: (petition) =>
       UserModel.findById(petition.ownerId),
     votes: (petition) =>

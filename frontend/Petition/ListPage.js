@@ -28,7 +28,6 @@ class ListPage extends Component {
         <Typography component="h2" variant="display2" gutterBottom>
           Seznam peticí
         </Typography>
-
         <div className={classes.row}>
           <PetitionTable
             onRowClick={this.handleClickRow}

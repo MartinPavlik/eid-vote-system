@@ -1,5 +1,7 @@
 import React, { Component, Fragment } from 'react';
-import { Mutation } from 'react-apollo';
+import { pipe } from 'ramda';
+import Link from 'components/Link';
+import { graphql } from 'react-apollo';
 import gql from 'graphql-tag';
 import FormControl from '@material-ui/core/FormControl';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -8,7 +10,8 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
-
+import redirect from 'lib/redirect';
+import withCurrentUserId from 'Auth/withCurrentUserId';
 
 const styles = () => ({
   row: {
@@ -129,17 +132,31 @@ class CreatePetitionForm extends Component {
     const newTo = new Date(values.to);
 
     if (hasError) return;
+
     onSubmit({
       ...values,
       from: newFrom.toISOString(),
       to: newTo.toISOString(),
-    }).then(console.log);
+    }).then(petition => {
+      redirect(`/petition/${petition._id}`);
+    });
   }
 
   render() {
-    console.log('props::', this.props);
     const { values, form } = this.state;
-    const { classes } = this.props;
+    const { classes, currentUserId } = this.props;
+
+    console.log('this.props: ', this.props); // eslint-disable-line
+
+    // TODO - ui
+    if (!currentUserId) {
+      return (
+        <Typography>
+          Only logged in users can create petitions, please{' '}
+          <Link href="/login">login</Link>.
+        </Typography>
+      );
+    }
 
     return (
       <Fragment>
@@ -223,8 +240,6 @@ class CreatePetitionForm extends Component {
   }
 }
 
-const CreatePetitionFormWithStyles = withStyles(styles)(CreatePetitionForm);
-
 const createPetitionMutation = gql`
   mutation createPetition($input: PetitionInput!) {
     createPetition(input: $input) {
@@ -237,26 +252,22 @@ const createPetitionMutation = gql`
   }
 `;
 
-const CreatePage = () => (
-  <Mutation
-    mutation={createPetitionMutation}
-  >
-    {(createPetition, { data }) => (
-      <div>
-        <CreatePetitionFormWithStyles
-          onSubmit={input => {
-            return createPetition({
-              variables: {
-                input,
-              },
-            });
-          }}
-          data={data}
-        />
-      </div>
-    )}
-  </Mutation>
-);
-
-
-export default CreatePage;
+export default pipe(
+  withCurrentUserId,
+  withStyles(styles),
+  graphql(
+    createPetitionMutation,
+    {
+      props: ({ mutate, ...rest }) => ({
+        ...rest,
+        onSubmit: input =>
+          mutate({
+            variables: {
+              input,
+            },
+          })
+            .then(({ data: { createPetition } }) => createPetition),
+      }),
+    },
+  ),
+)(CreatePetitionForm);

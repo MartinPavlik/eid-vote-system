@@ -23,6 +23,7 @@ const Layout = ({
         .topbar {
           grid-area: topbar;
           display: flex;
+          background: #2b3d51;
         }
 
         .wrapper {
@@ -33,14 +34,17 @@ const Layout = ({
 
         .content {
           padding: 2rem;
-          flex-grow: 1;
+          width: 70%;
+          margin: 0 auto;
         }
       `
     }
     </style>
     <div className="container">
       <div className="topbar">
-        <AppBar />
+        <div className="content">
+          <AppBar />
+        </div>
       </div>
 
       <div className="wrapper">

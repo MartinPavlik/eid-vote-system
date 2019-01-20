@@ -1,8 +1,10 @@
 import React, { Component, Fragment } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import { pipe } from 'ramda';
+import { graphql } from 'react-apollo';
+import gql from 'graphql-tag';
 import PetitionTable from '../Petition/components/PetitionTable';
-
 
 const styles = () => ({
   intro: {
@@ -18,10 +20,9 @@ const styles = () => ({
   },
 });
 
-
 class Home extends Component {
   render() {
-    const { classes } = this.props;
+    const { classes, data: { petitions } } = this.props;
 
     return (
       <Fragment>
@@ -35,7 +36,7 @@ class Home extends Component {
         </Typography>
 
         <PetitionTable
-          rows={[]}
+          rows={petitions || []}
         />
 
       </Fragment>
@@ -43,5 +44,21 @@ class Home extends Component {
   }
 }
 
+const PetitionsQuery = gql`
+  query Petitions {
+    petitions {
+      _id
+      title
+      description
+      from
+      to
+    }
+  }
+`;
 
-export default withStyles(styles)(Home);
+const withPetitions = graphql(PetitionsQuery);
+
+export default pipe(
+  withStyles(styles),
+  withPetitions,
+)(Home);
