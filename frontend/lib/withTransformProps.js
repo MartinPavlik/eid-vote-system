@@ -1,10 +1,15 @@
-import { connect } from 'react-redux';
+import React from 'react';
 
-
-export const withTransformProps = transformProps => connect(
-  null,
-  undefined,
-  (stateProps, dispatchProps, ownProps) => transformProps(ownProps),
-);
+export const withTransformProps = mapper => Component =>
+  class WithTransformProps extends React.Component {
+    render() {
+      return (
+        <Component
+          // TODO - memoize results of mapper...
+          {...mapper(this.props)}
+        />
+      );
+    }
+  };
 
 export default withTransformProps;
