@@ -13,6 +13,7 @@ const withCurrentUserId = graphql(
     props: ({ data: { currentUserId } }) => ({
       currentUserId,
     }),
+    fetchPolicy: 'network-only',
   },
 );
 
