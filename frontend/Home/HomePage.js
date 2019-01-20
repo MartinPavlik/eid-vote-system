@@ -12,11 +12,13 @@ const styles = () => ({
     backgroundSize: '100% 100%',
     height: 400,
     color: 'block',
-    fontSize: '4em',
     fontWeight: 'bold',
     paddingTop: '1em',
     paddingLeft: '1em',
     marginBottom: 25,
+  },
+  logo: {
+    height: 100,
   },
 });
 
@@ -28,7 +30,7 @@ class Home extends Component {
       <Fragment>
 
         <div className={classes.intro}>
-          Petice
+          <img className={classes.logo} src="/static/logo-black.png" />
         </div>
 
         <Typography component="h2" variant="display1" gutterBottom>
